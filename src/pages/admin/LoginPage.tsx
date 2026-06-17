@@ -50,6 +50,22 @@ export function AdminLoginPage() {
     }
   }, [searchParams, verifyLink, setSession, navigate])
 
+  useEffect(() => {
+    const oauthToken = searchParams.get("oauth_token")
+    if (!oauthToken) return
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`, {
+      headers: { Authorization: `Bearer ${oauthToken}` },
+    })
+      .then((r) => r.json())
+      .then((data: { status: string; data: { user: import('@/api/types').User } }) => {
+        if (data.status === "success") {
+          setSession({ token: oauthToken, user: data.data.user })
+          navigate("/admin/dashboard", { replace: true })
+        }
+      })
+      .catch(() => toast.error("OAuth login failed"))
+  }, [searchParams, setSession, navigate])
+
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   })

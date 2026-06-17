@@ -53,6 +53,22 @@ export function CustomerLoginPage() {
     if (token && email) verifyLink({ token, email })
   }, [searchParams, verifyLink])
 
+  useEffect(() => {
+    const oauthToken = searchParams.get("oauth_token")
+    if (!oauthToken) return
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/customer/me`, {
+      headers: { Authorization: `Bearer ${oauthToken}` },
+    })
+      .then((r) => r.json())
+      .then((data: { status: string; data: { customer: import('@/api/types').Customer } }) => {
+        if (data.status === "success") {
+          setSession({ token: oauthToken, customer: data.data.customer })
+          navigate(base, { replace: true })
+        }
+      })
+      .catch(() => toast.error("OAuth login failed"))
+  }, [searchParams, setSession, navigate, base])
+
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   })
@@ -79,7 +95,7 @@ export function CustomerLoginPage() {
             <Button
               variant="outline"
               className="w-full gap-2"
-              onClick={() => { window.location.href = getCustomerOAuthUrl("google") }}
+              onClick={() => { window.location.href = getCustomerOAuthUrl("google", storeSlug) }}
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -92,7 +108,7 @@ export function CustomerLoginPage() {
             <Button
               variant="outline"
               className="w-full gap-2"
-              onClick={() => { window.location.href = getCustomerOAuthUrl("github") }}
+              onClick={() => { window.location.href = getCustomerOAuthUrl("github", storeSlug) }}
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58 0-.28-.01-1.03-.01-2.02-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.14 3 .4 2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22 0 1.6-.01 2.9-.01 3.29 0 .32.22.69.82.57C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>

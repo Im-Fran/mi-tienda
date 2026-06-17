@@ -37,8 +37,9 @@ export function verifyCustomerMagicLink(token: string, email: string) {
   )
 }
 
-export function getCustomerOAuthUrl(provider: 'google' | 'github') {
-  return `${import.meta.env.VITE_API_BASE_URL}/api/auth/customer/oauth/${provider}`
+export function getCustomerOAuthUrl(provider: 'google' | 'github', storeSlug?: string) {
+  const base = `${import.meta.env.VITE_API_BASE_URL}/api/auth/customer/oauth/${provider}`
+  return storeSlug ? `${base}?store_slug=${encodeURIComponent(storeSlug)}` : base
 }
 
 export function customerLogout() {
