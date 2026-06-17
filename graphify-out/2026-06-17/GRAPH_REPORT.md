@@ -1,18 +1,12 @@
-# Graph Report - mi-tienda  (2026-06-17)
+# Graph Report - .  (2026-06-17)
 
 ## Corpus Check
-- 104 files · ~33,034 words
-- Verdict: corpus is large enough that graph structure adds value.
+- Corpus is ~2,852 words - fits in a single context window. You may not need a graph.
 
 ## Summary
-- 115 nodes · 105 edges · 19 communities (9 shown, 10 thin omitted)
-- Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 12 edges (avg confidence: 0.87)
+- 100 nodes · 93 edges · 17 communities (9 shown, 8 thin omitted)
+- Extraction: 87% EXTRACTED · 13% INFERRED · 0% AMBIGUOUS · INFERRED: 12 edges (avg confidence: 0.87)
 - Token cost: 0 input · 0 output
-
-## Graph Freshness
-- Built from commit: `6c56e9bf`
-- Run `git rev-parse HEAD` and compare to check if the graph is stale.
-- Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - [[_COMMUNITY_TypeScript App Config|TypeScript App Config]]
@@ -20,6 +14,7 @@
 - [[_COMMUNITY_Dev Dependencies|Dev Dependencies]]
 - [[_COMMUNITY_Assets & Documentation|Assets & Documentation]]
 - [[_COMMUNITY_Runtime Dependencies|Runtime Dependencies]]
+- [[_COMMUNITY_App Entry Point|App Entry Point]]
 - [[_COMMUNITY_TypeScript Root Config|TypeScript Root Config]]
 - [[_COMMUNITY_Bluesky Icon|Bluesky Icon]]
 - [[_COMMUNITY_Discord Icon|Discord Icon]]
@@ -28,8 +23,6 @@
 - [[_COMMUNITY_Social Icon|Social Icon]]
 - [[_COMMUNITY_Icons SVG Sprite|Icons SVG Sprite]]
 - [[_COMMUNITY_X (Twitter) Icon|X (Twitter) Icon]]
-- [[_COMMUNITY_Community 17|Community 17]]
-- [[_COMMUNITY_Community 18|Community 18]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `compilerOptions` - 17 edges
@@ -44,14 +37,16 @@
 10. `eslint-plugin-react-x` - 3 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Hero Image (3D layered purple platform)` --conceptually_related_to--> `mi-tienda README`  [INFERRED]
-  src/assets/hero.png → README.md
 - `Favicon SVG (Claude/Lightning bolt purple icon)` --conceptually_related_to--> `mi-tienda README`  [INFERRED]
   public/favicon.svg → README.md
+- `Hero Image (3D layered purple platform)` --conceptually_related_to--> `mi-tienda README`  [INFERRED]
+  src/assets/hero.png → README.md
 - `React Logo SVG` --conceptually_related_to--> `React`  [INFERRED]
   src/assets/react.svg → README.md
 - `Vite Logo SVG` --conceptually_related_to--> `Vite`  [INFERRED]
   src/assets/vite.svg → README.md
+- `index.html Entry Point` --references--> `Favicon SVG (Claude/Lightning bolt purple icon)`  [EXTRACTED]
+  index.html → public/favicon.svg
 
 ## Import Cycles
 - None detected.
@@ -61,7 +56,7 @@
 - **ESLint Type-Aware Linting Configuration** — readme_eslint, readme_tseslint_recommended_type_checked, readme_eslint_plugin_react_x, readme_eslint_plugin_react_dom [INFERRED 0.85]
 - **App Entry Point and Static Assets** — index_html, favicon_svg, src_main_tsx [EXTRACTED 1.00]
 
-## Communities (19 total, 10 thin omitted)
+## Communities (17 total, 8 thin omitted)
 
 ### Community 0 - "TypeScript App Config"
 Cohesion: 0.11
@@ -76,27 +71,31 @@ Cohesion: 0.12
 Nodes (17): devDependencies, @babel/core, babel-plugin-react-compiler, eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals (+9 more)
 
 ### Community 3 - "Assets & Documentation"
-Cohesion: 0.19
-Nodes (16): Hero Image (3D layered purple platform), React Logo SVG, Vite Logo SVG, Favicon SVG (Claude/Lightning bolt purple icon), ESLint, eslint-plugin-react-dom, eslint-plugin-react-x, Hot Module Replacement (HMR) (+8 more)
+Cohesion: 0.21
+Nodes (15): Hero Image (3D layered purple platform), React Logo SVG, Vite Logo SVG, ESLint, eslint-plugin-react-dom, eslint-plugin-react-x, Hot Module Replacement (HMR), mi-tienda README (+7 more)
 
 ### Community 4 - "Runtime Dependencies"
 Cohesion: 0.15
 Nodes (12): dependencies, react, react-dom, name, private, scripts, build, dev (+4 more)
 
+### Community 5 - "App Entry Point"
+Cohesion: 0.67
+Nodes (3): Favicon SVG (Claude/Lightning bolt purple icon), index.html Entry Point, src/main.tsx
+
 ## Knowledge Gaps
-- **74 isolated node(s):** `LoginForm`, `LoginForm`, `name`, `private`, `version` (+69 more)
+- **72 isolated node(s):** `name`, `private`, `version`, `type`, `dev` (+67 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **10 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **8 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `devDependencies` connect `Dev Dependencies` to `Runtime Dependencies`?**
-  _High betweenness centrality (0.051) - this node is a cross-community bridge._
+  _High betweenness centrality (0.068) - this node is a cross-community bridge._
 - **Are the 2 inferred relationships involving `mi-tienda README` (e.g. with `Hero Image (3D layered purple platform)` and `Favicon SVG (Claude/Lightning bolt purple icon)`) actually correct?**
   _`mi-tienda README` has 2 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `LoginForm`, `LoginForm`, `name` to the rest of the system?**
-  _76 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `name`, `private`, `version` to the rest of the system?**
+  _74 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `TypeScript App Config` be split into smaller, more focused modules?**
   _Cohesion score 0.10526315789473684 - nodes in this community are weakly interconnected._
 - **Should `TypeScript Node Config` be split into smaller, more focused modules?**

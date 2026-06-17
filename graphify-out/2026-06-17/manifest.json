@@ -1,0 +1,77 @@
+{
+  "/Users/fran/Development/Im-Fran/mi-tienda/eslint.config.js": {
+    "mtime": 1781725591.7805989,
+    "ast_hash": "0355276bc79439afe3c53e3a2470ca1e",
+    "semantic_hash": "0355276bc79439afe3c53e3a2470ca1e"
+  },
+  "/Users/fran/Development/Im-Fran/mi-tienda/package.json": {
+    "mtime": 1781725591.7945147,
+    "ast_hash": "4c39bad63c9691b117fc7a5f36ce417f",
+    "semantic_hash": "4c39bad63c9691b117fc7a5f36ce417f"
+  },
+  "/Users/fran/Development/Im-Fran/mi-tienda/src/App.tsx": {
+    "mtime": 1781725591.7862353,
+    "ast_hash": "c5e44a49ac2a44373fba5d1a7fe35be4",
+    "semantic_hash": "c5e44a49ac2a44373fba5d1a7fe35be4"
+  },
+  "/Users/fran/Development/Im-Fran/mi-tienda/src/main.tsx": {
+    "mtime": 1781725591.790172,
+    "ast_hash": "787e5a07efeb2bf6209d5937195f2f68",
+    "semantic_hash": "787e5a07efeb2bf6209d5937195f2f68"
+  },
+  "/Users/fran/Development/Im-Fran/mi-tienda/tsconfig.app.json": {
+    "mtime": 1781725591.7909956,
+    "ast_hash": "136630b5accce1ca50663df229534a26",
+    "semantic_hash": "136630b5accce1ca50663df229534a26"
+  },
+  "/Users/fran/Development/Im-Fran/mi-tienda/tsconfig.json": {
+    "mtime": 1781725591.791536,
+    "ast_hash": "a3d39fa780ebff65444de257f291ce6c",
+    "semantic_hash": "a3d39fa780ebff65444de257f291ce6c"
+  },
+  "/Users/fran/Development/Im-Fran/mi-tienda/tsconfig.node.json": {
+    "mtime": 1781725591.7928674,
+    "ast_hash": "70bdd0a673bcfc0e828080b306e7c680",
+    "semantic_hash": "70bdd0a673bcfc0e828080b306e7c680"
+  },
+  "/Users/fran/Development/Im-Fran/mi-tienda/vite.config.ts": {
+    "mtime": 1781725591.7947116,
+    "ast_hash": "d1bc84d991228ada9b2918b3425aed96",
+    "semantic_hash": "d1bc84d991228ada9b2918b3425aed96"
+  },
+  "/Users/fran/Development/Im-Fran/mi-tienda/README.md": {
+    "mtime": 1781725591.7951531,
+    "ast_hash": "987442a8c620e4b9d478748fe65a6a46",
+    "semantic_hash": "987442a8c620e4b9d478748fe65a6a46"
+  },
+  "/Users/fran/Development/Im-Fran/mi-tienda/index.html": {
+    "mtime": 1781725591.7820728,
+    "ast_hash": "78d4ed20da78d2479e5e7f6e7d77470b",
+    "semantic_hash": "78d4ed20da78d2479e5e7f6e7d77470b"
+  },
+  "/Users/fran/Development/Im-Fran/mi-tienda/public/favicon.svg": {
+    "mtime": 1781725591.783467,
+    "ast_hash": "7e840862161341271697daa99a40d76b",
+    "semantic_hash": "7e840862161341271697daa99a40d76b"
+  },
+  "/Users/fran/Development/Im-Fran/mi-tienda/public/icons.svg": {
+    "mtime": 1781725591.7846267,
+    "ast_hash": "3b4fcfcf393eca4d264dca4a4663bc37",
+    "semantic_hash": "3b4fcfcf393eca4d264dca4a4663bc37"
+  },
+  "/Users/fran/Development/Im-Fran/mi-tienda/src/assets/hero.png": {
+    "mtime": 1781725591.7871842,
+    "ast_hash": "aead493361b27e7510691c5d7072dfc1",
+    "semantic_hash": "aead493361b27e7510691c5d7072dfc1"
+  },
+  "/Users/fran/Development/Im-Fran/mi-tienda/src/assets/react.svg": {
+    "mtime": 1781725591.7879462,
+    "ast_hash": "f0402b67b6ce880f65666bb49e841696",
+    "semantic_hash": "f0402b67b6ce880f65666bb49e841696"
+  },
+  "/Users/fran/Development/Im-Fran/mi-tienda/src/assets/vite.svg": {
+    "mtime": 1781725591.7885153,
+    "ast_hash": "9960a24288958394ac50e57ff638b036",
+    "semantic_hash": "9960a24288958394ac50e57ff638b036"
+  }
+}
