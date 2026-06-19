@@ -13,7 +13,7 @@ import { useAdminCarts, useAdminCart } from "@/hooks/useCarts"
 import { formatDate, formatCurrency, truncate } from "@/lib/utils"
 import type { Cart } from "@/api/types"
 
-function CartsTab({ storeId, status }: { storeId: string; status: "pending" | "completed" }) {
+function CartsTab({ storeId, status }: { storeId: string; status: 'active' | 'abandoned' | 'completed' }) {
   const [page, setPage] = useState(1)
   const [selectedCartId, setSelectedCartId] = useState<string | null>(null)
   const { data, isLoading, isError, refetch } = useAdminCarts(storeId, { status, page })
@@ -82,13 +82,17 @@ export function CartsPage() {
   return (
     <div>
       <PageHeader title="Carts" />
-      <Tabs defaultValue="pending">
+      <Tabs defaultValue="active">
         <TabsList className="mb-4">
-          <TabsTrigger value="pending">Pending</TabsTrigger>
+          <TabsTrigger value="active">Active</TabsTrigger>
+          <TabsTrigger value="abandoned">Abandoned</TabsTrigger>
           <TabsTrigger value="completed">Completed</TabsTrigger>
         </TabsList>
-        <TabsContent value="pending">
-          <CartsTab storeId={storeId!} status="pending" />
+        <TabsContent value="active">
+          <CartsTab storeId={storeId!} status="active" />
+        </TabsContent>
+        <TabsContent value="abandoned">
+          <CartsTab storeId={storeId!} status="abandoned" />
         </TabsContent>
         <TabsContent value="completed">
           <CartsTab storeId={storeId!} status="completed" />
