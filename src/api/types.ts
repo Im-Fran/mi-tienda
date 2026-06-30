@@ -211,7 +211,7 @@ export interface Coupon {
 
 // ---------- Cart ----------
 
-export type CartStatus = 'pending' | 'completed'
+export type CartStatus = 'active' | 'abandoned' | 'completed'
 
 export interface CartItem {
   id: string

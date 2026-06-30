@@ -1,0 +1,191 @@
+{
+  "nodes": [
+    {
+      "id": "users_fran_development_im_fran_mi_tienda_readme_md",
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "mi_tienda_readme_mitienda_frontend",
+      "label": "Mi Tienda Frontend",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "mi_tienda_readme_tech_stack",
+      "label": "Tech Stack",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L9"
+    },
+    {
+      "id": "mi_tienda_readme_prerequisites",
+      "label": "Prerequisites",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L25"
+    },
+    {
+      "id": "mi_tienda_readme_environment_variables",
+      "label": "Environment Variables",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L30"
+    },
+    {
+      "id": "mi_tienda_readme_local_development",
+      "label": "Local Development",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L41"
+    },
+    {
+      "id": "mi_tienda_readme_build",
+      "label": "Build",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L50"
+    },
+    {
+      "id": "mi_tienda_readme_cloudflare_pages_deployment",
+      "label": "Cloudflare Pages Deployment",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L58"
+    },
+    {
+      "id": "mi_tienda_readme_shadcn_ui_components",
+      "label": "shadcn/ui Components",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L79"
+    },
+    {
+      "id": "mi_tienda_readme_project_structure",
+      "label": "Project Structure",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L98"
+    },
+    {
+      "id": "mi_tienda_readme_auth_flow",
+      "label": "Auth Flow",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L127"
+    },
+    {
+      "id": "mi_tienda_readme_business_rules",
+      "label": "Business Rules",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L135"
+    }
+  ],
+  "edges": [
+    {
+      "source": "users_fran_development_im_fran_mi_tienda_readme_md",
+      "target": "mi_tienda_readme_mitienda_frontend",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "mi_tienda_readme_mitienda_frontend",
+      "target": "mi_tienda_readme_tech_stack",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "mi_tienda_readme_mitienda_frontend",
+      "target": "mi_tienda_readme_prerequisites",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "mi_tienda_readme_mitienda_frontend",
+      "target": "mi_tienda_readme_environment_variables",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "mi_tienda_readme_mitienda_frontend",
+      "target": "mi_tienda_readme_local_development",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "mi_tienda_readme_mitienda_frontend",
+      "target": "mi_tienda_readme_build",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "mi_tienda_readme_mitienda_frontend",
+      "target": "mi_tienda_readme_cloudflare_pages_deployment",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L58",
+      "weight": 1.0
+    },
+    {
+      "source": "mi_tienda_readme_mitienda_frontend",
+      "target": "mi_tienda_readme_shadcn_ui_components",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L79",
+      "weight": 1.0
+    },
+    {
+      "source": "mi_tienda_readme_mitienda_frontend",
+      "target": "mi_tienda_readme_project_structure",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L98",
+      "weight": 1.0
+    },
+    {
+      "source": "mi_tienda_readme_mitienda_frontend",
+      "target": "mi_tienda_readme_auth_flow",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L127",
+      "weight": 1.0
+    },
+    {
+      "source": "mi_tienda_readme_mitienda_frontend",
+      "target": "mi_tienda_readme_business_rules",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L135",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

@@ -99,7 +99,7 @@ export function checkout(
 
 export function listAdminCarts(
   storeId: string,
-  params: { status?: 'pending' | 'completed'; page?: number; perPage?: number } = {}
+  params: { status?: 'active' | 'abandoned' | 'completed'; page?: number; perPage?: number } = {}
 ) {
   const qs = new URLSearchParams()
   if (params.status) qs.set('status', params.status)

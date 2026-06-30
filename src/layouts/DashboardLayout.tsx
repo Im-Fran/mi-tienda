@@ -96,7 +96,7 @@ export function DashboardLayout() {
       <aside className="w-60 border-r bg-sidebar flex flex-col shrink-0">
         {/* Logo */}
         <div className="h-14 flex items-center px-4 border-b">
-          <span className="font-bold text-lg text-sidebar-foreground">miTienda</span>
+          <span className="font-bold text-lg text-sidebar-foreground">Mi Tienda</span>
         </div>
 
         {/* Store selector */}
