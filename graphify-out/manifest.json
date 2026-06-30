@@ -5,9 +5,9 @@
     "semantic_hash": "0355276bc79439afe3c53e3a2470ca1e"
   },
   "package.json": {
-    "mtime": 1781726235.754674,
-    "ast_hash": "9e8c52f7bfe03ab042a44361faa12f76",
-    "semantic_hash": "9e8c52f7bfe03ab042a44361faa12f76"
+    "mtime": 1781840670.9299293,
+    "ast_hash": "fdddf96a1a0ab3423e9ba0568697d0ec",
+    "semantic_hash": ""
   },
   "src/App.tsx": {
     "mtime": 1781725591.7862353,
@@ -95,9 +95,9 @@
     "semantic_hash": "d4801d7510c743a6b132696e86816dd8"
   },
   "src/api/endpoints/carts.ts": {
-    "mtime": 1781726373.6289399,
-    "ast_hash": "1084bd9ae0cc09dcc52d9f674e53a581",
-    "semantic_hash": "1084bd9ae0cc09dcc52d9f674e53a581"
+    "mtime": 1781840414.3658607,
+    "ast_hash": "c2abea751671d4fe2c8e7efa2e59189e",
+    "semantic_hash": ""
   },
   "src/api/endpoints/categories.ts": {
     "mtime": 1781726345.3048224,
@@ -145,9 +145,9 @@
     "semantic_hash": "b88812c885f785dae8a7d0f817b1b073"
   },
   "src/api/types.ts": {
-    "mtime": 1781726275.873123,
-    "ast_hash": "8b71dd127f1d3cc5019acb57afd02b1a",
-    "semantic_hash": "8b71dd127f1d3cc5019acb57afd02b1a"
+    "mtime": 1781840397.3332036,
+    "ast_hash": "59ba8a04072fc62759e57a6a10840dd1",
+    "semantic_hash": ""
   },
   "src/app.tsx": {
     "mtime": 1781727361.8234768,
@@ -325,7 +325,7 @@
     "semantic_hash": "cf55bef69f89670e3214368e84276af7"
   },
   "src/hooks/useCarts.ts": {
-    "mtime": 1781726562.6203523,
+    "mtime": 1781840420.9640088,
     "ast_hash": "fb25ace34ed2d2d078d2b601e7c26181",
     "semantic_hash": "fb25ace34ed2d2d078d2b601e7c26181"
   },
@@ -395,9 +395,9 @@
     "semantic_hash": "dc399fbc5157878a8fb75673fc7888cc"
   },
   "src/pages/admin/CartsPage.tsx": {
-    "mtime": 1781726876.1501262,
-    "ast_hash": "bc975e2f08c95cb30c3f0492873d5a59",
-    "semantic_hash": "bc975e2f08c95cb30c3f0492873d5a59"
+    "mtime": 1781840436.8572965,
+    "ast_hash": "b94d375501f495c3a14e5bc06af05d0f",
+    "semantic_hash": ""
   },
   "src/pages/admin/CategoriesPage.tsx": {
     "mtime": 1781728328.6810145,
@@ -557,6 +557,41 @@
   ".claude/settings.local.json": {
     "mtime": 1781837943.7900681,
     "ast_hash": "206940b8fcab0cd0c1987baaad8ee4bd",
+    "semantic_hash": ""
+  },
+  "src/test/api-client.test.ts": {
+    "mtime": 1781840884.8988256,
+    "ast_hash": "7608dafc54c01ef5a8894d035f2b6c4b",
+    "semantic_hash": ""
+  },
+  "src/test/endpoints.test.ts": {
+    "mtime": 1781840864.7839317,
+    "ast_hash": "a933958a6245e50726a2683bd391505c",
+    "semantic_hash": ""
+  },
+  "src/test/setup.ts": {
+    "mtime": 1781840815.852598,
+    "ast_hash": "446f4893e622adf2e76d3a657aef2999",
+    "semantic_hash": ""
+  },
+  "src/test/stores.test.ts": {
+    "mtime": 1781840755.7669835,
+    "ast_hash": "584f2e110885f9409e4fad0cae87d971",
+    "semantic_hash": ""
+  },
+  "src/test/utils.test.ts": {
+    "mtime": 1781840902.9025846,
+    "ast_hash": "7969f50b6f1e3fd878eb1ca3e8703f71",
+    "semantic_hash": ""
+  },
+  "src/test/validators.test.ts": {
+    "mtime": 1781840800.296786,
+    "ast_hash": "99b17e812af709af8628b5c7242385cc",
+    "semantic_hash": ""
+  },
+  "vitest.config.ts": {
+    "mtime": 1781840661.93583,
+    "ast_hash": "9267316884f865bc2b38e326e2e803fa",
     "semantic_hash": ""
   }
 }

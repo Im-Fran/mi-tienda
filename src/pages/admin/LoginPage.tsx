@@ -84,7 +84,7 @@ export function AdminLoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">miTienda Admin</CardTitle>
+          <CardTitle className="text-2xl">Mi Tienda Admin</CardTitle>
           <CardDescription>Sign in to manage your stores</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

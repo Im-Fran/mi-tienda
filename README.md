@@ -1,31 +1,32 @@
-# miTienda Frontend
+# Mi Tienda Frontend
 
-Vite + React 19 SPA for the miTienda multi-tenant SaaS e-commerce platform.
+Vite + React 19 SPA for the Mi Tienda multi-tenant SaaS e-commerce platform.
 
 Two apps in one:
+
 - `/admin/*` — dashboard for store owners and system admins
 - `/store/:storeSlug/*` — storefront for customers
 
 ## Tech Stack
 
-| Layer | Library |
-|---|---|
-| Framework | React 19 + Vite |
-| Routing | React Router v7 |
-| Server state | TanStack Query v5 |
-| Client state | Zustand (persist) |
-| Forms | React Hook Form + Zod |
-| UI | shadcn/ui + Tailwind CSS v4 |
-| Charts | Recharts |
-| Icons | Lucide React |
-| Markdown | react-markdown + @uiw/react-md-editor |
-| Notifications | Sonner |
-| Deployment | Cloudflare Pages |
+| Layer         | Library                               |
+| ------------- | ------------------------------------- |
+| Framework     | React 19 + Vite                       |
+| Routing       | React Router v7                       |
+| Server state  | TanStack Query v5                     |
+| Client state  | Zustand (persist)                     |
+| Forms         | React Hook Form + Zod                 |
+| UI            | shadcn/ui + Tailwind CSS v4           |
+| Charts        | Recharts                              |
+| Icons         | Lucide React                          |
+| Markdown      | react-markdown + @uiw/react-md-editor |
+| Notifications | Sonner                                |
+| Deployment    | Cloudflare Pages                      |
 
 ## Prerequisites
 
 - Node.js 20+
-- The miTienda backend API running at `http://localhost:8787`
+- The Mi Tienda backend API running at `http://localhost:8787`
 
 ## Environment Variables
 
@@ -69,10 +70,10 @@ npx wrangler pages deploy dist
 
 Set the following environment variables in the Cloudflare Pages dashboard (Settings > Environment variables):
 
-| Variable | Value |
-|---|---|
-| `VITE_API_BASE_URL` | URL of the deployed backend worker |
-| `VITE_APP_URL` | URL of the deployed frontend Pages project |
+| Variable            | Value                                      |
+| ------------------- | ------------------------------------------ |
+| `VITE_API_BASE_URL` | URL of the deployed backend worker         |
+| `VITE_APP_URL`      | URL of the deployed frontend Pages project |
 
 The `pages_build_output_dir = "dist"` in `wrangler.toml` tells Cloudflare Pages where to find the build output. For CI/CD, connect the GitHub repo and set the build command to `npm run build`.
 
