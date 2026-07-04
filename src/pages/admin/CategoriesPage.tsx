@@ -4,7 +4,6 @@ import { toast } from "sonner"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { useQueryClient } from "@tanstack/react-query"
 import {
   Plus,
   Pencil,
@@ -59,6 +58,7 @@ import {
   useCreateCategory,
   useUpdateCategory,
   useDeleteCategory,
+  useMoveCategoryOptimistic,
 } from "@/hooks/useCategories"
 import {
   flattenVisibleTree,
@@ -370,12 +370,12 @@ function CategoryRow({
 
 export function CategoriesPage() {
   const { storeId } = useParams<{ storeId: string }>()
-  const queryClient = useQueryClient()
 
   const { data: categories, isLoading, isError, refetch } = useCategories(storeId!)
   const { mutateAsync: createCategory, isPending: creating } = useCreateCategory(storeId!)
   const { mutateAsync: updateCategory, isPending: updating } = useUpdateCategory(storeId!)
   const { mutateAsync: deleteCategory, isPending: deleting } = useDeleteCategory(storeId!)
+  const { mutateAsync: moveCategory } = useMoveCategoryOptimistic(storeId!)
 
   // Estado de modales
   const [addRootOpen, setAddRootOpen] = useState(false)
@@ -581,8 +581,9 @@ export function CategoriesPage() {
     const sortOrder = computeSortOrder(newSiblings, drop.insertAfterId)
 
     // Expandir el nuevo padre para que el ítem quede visible tras el drop
-    if (drop.parentId && collapsedIds.has(drop.parentId)) {
-      const parentId = drop.parentId
+    const parentWasCollapsed = drop.parentId !== null && collapsedIds.has(drop.parentId)
+    if (parentWasCollapsed) {
+      const parentId = drop.parentId!
       setCollapsedIds((prev) => {
         const next = new Set(prev)
         next.delete(parentId)
@@ -590,17 +591,15 @@ export function CategoriesPage() {
       })
     }
 
-    // Update optimista: el árbol se actualiza al instante, sin snap-back
-    const queryKey = ["stores", storeId, "categories"]
-    const previousTree = queryClient.getQueryData<Category[]>(queryKey)
-    queryClient.setQueryData<Category[]>(
-      queryKey,
-      moveCategoryInTree(categories, activeId, drop.parentId, sortOrder)
-    )
-
     const parentChanged = drop.parentId !== activeNode.parentId
     try {
-      await updateCategory({ id: activeId, data: { parentId: drop.parentId, sortOrder } })
+      // Update optimista gestionado por el hook (cancelQueries + snapshot +
+      // setQueryData en onMutate, rollback en onError, invalidate en onSettled)
+      await moveCategory({
+        id: activeId,
+        data: { parentId: drop.parentId, sortOrder },
+        optimisticTree: moveCategoryInTree(categories, activeId, drop.parentId, sortOrder),
+      })
       if (!parentChanged) {
         toast.success("Orden actualizado")
       } else if (drop.parentId === null) {
@@ -610,8 +609,11 @@ export function CategoriesPage() {
         toast.success(`Categoría movida dentro de "${parentName}"`)
       }
     } catch (err) {
-      // Revertir el update optimista si la mutación falla
-      queryClient.setQueryData(queryKey, previousTree)
+      // Revertir la auto-expansión del padre si la mutación falla
+      if (parentWasCollapsed) {
+        const parentId = drop.parentId!
+        setCollapsedIds((prev) => new Set(prev).add(parentId))
+      }
       toast.error(getErrorMessage(err, "Error al mover la categoría"))
     }
   }

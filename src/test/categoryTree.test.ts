@@ -119,7 +119,7 @@ describe('getProjection', () => {
   })
 
   it('proyecta como hijo del ítem anterior al arrastrar hacia la derecha', () => {
-    // "c" sobre "b" con offset de 1 nivel → hijo de "a" (ítem anterior "a2" depth 1)
+    // "c" sin moverse con offset de 1 nivel → hijo de "b" (ítem anterior, depth 0)
     const p = getProjection(flat(), 'c', 'c', 20, 20)
     expect(p?.depth).toBe(1)
     expect(p?.parentId).toBe('b')
