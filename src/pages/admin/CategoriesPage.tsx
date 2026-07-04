@@ -4,6 +4,7 @@ import { toast } from "sonner"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { useQueryClient } from "@tanstack/react-query"
 import {
   Plus,
   Pencil,
@@ -17,16 +18,22 @@ import {
   DragOverlay,
   closestCenter,
   PointerSensor,
+  KeyboardSensor,
   useSensor,
   useSensors,
-  useDroppable,
+  MeasuringStrategy,
+  defaultDropAnimation,
   type DragEndEvent,
   type DragStartEvent,
+  type DragMoveEvent,
+  type DragOverEvent,
+  type DropAnimation,
 } from "@dnd-kit/core"
 import {
   SortableContext,
   useSortable,
   verticalListSortingStrategy,
+  sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { Button } from "@/components/ui/button"
@@ -53,6 +60,16 @@ import {
   useUpdateCategory,
   useDeleteCategory,
 } from "@/hooks/useCategories"
+import {
+  flattenVisibleTree,
+  findCategory,
+  getDescendantIds,
+  countDescendants,
+  getProjection,
+  computeSortOrder,
+  moveCategoryInTree,
+  type FlatCategory,
+} from "@/lib/categoryTree"
 import type { Category } from "@/api/types"
 import { ApiError } from "@/api/client"
 
@@ -83,55 +100,38 @@ function slugify(value: string): string {
     .replace(/-+/g, "-")
 }
 
-interface FlatItem {
-  id: string
-  name: string
-  parentId: string | null
-  sortOrder: number
-  depth: number
-}
-
-function flattenTree(categories: Category[], depth = 0): FlatItem[] {
-  const result: FlatItem[] = []
-  for (const cat of categories) {
-    result.push({
-      id: cat.id,
-      name: cat.name,
-      parentId: cat.parentId,
-      sortOrder: cat.sortOrder,
-      depth,
-    })
-    if (cat.children.length > 0) {
-      result.push(...flattenTree(cat.children, depth + 1))
-    }
-  }
-  return result
-}
-
 function getErrorMessage(err: unknown, fallback: string): string {
   return err instanceof ApiError ? err.message : fallback
 }
 
-// ─── Root Drop Zone ───────────────────────────────────────────────────────────
+// ─── Constantes de DnD ────────────────────────────────────────────────────────
 
-function RootDropZone({ visible }: { visible: boolean }) {
-  const { setNodeRef, isOver } = useDroppable({ id: "root-zone" })
+/** Ancho de sangría por nivel (px). También define el paso horizontal del drag. */
+const INDENTATION_WIDTH = 20
 
-  if (!visible) return null
-
-  return (
-    <div
-      ref={setNodeRef}
-      className={[
-        "mb-2 flex items-center justify-center rounded-lg border-2 border-dashed py-3 text-sm font-medium transition-colors select-none",
-        isOver
-          ? "border-primary bg-primary/10 text-primary"
-          : "border-muted-foreground/30 text-muted-foreground",
-      ].join(" ")}
-    >
-      Soltar aquí para hacer categoría raíz
-    </div>
-  )
+/** Animación de drop suave (patrón del ejemplo SortableTree de dnd-kit). */
+const dropAnimationConfig: DropAnimation = {
+  keyframes({ transform }) {
+    return [
+      { opacity: 1, transform: CSS.Transform.toString(transform.initial) },
+      {
+        opacity: 0,
+        transform: CSS.Transform.toString({
+          ...transform.final,
+          x: transform.final.x + 5,
+          y: transform.final.y + 5,
+        }),
+      },
+    ]
+  },
+  easing: "ease-out",
+  duration: 200,
+  sideEffects({ active }) {
+    active.node.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: defaultDropAnimation.duration,
+      easing: defaultDropAnimation.easing,
+    })
+  },
 }
 
 // ─── Form Fields ──────────────────────────────────────────────────────────────
@@ -199,59 +199,72 @@ function CategoryFormFields({ form, isLoading, fieldPrefix = "cat" }: FormFields
   )
 }
 
-// ─── Category Node ────────────────────────────────────────────────────────────
+// ─── Category Row ─────────────────────────────────────────────────────────────
+// Fila plana del árbol: los hijos NO se renderizan dentro del nodo sortable,
+// la jerarquía se representa solo con la sangría (paddingLeft por depth).
 
-interface CategoryNodeProps {
-  cat: Category
+interface CategoryRowProps {
+  item: FlatCategory
+  /** Profundidad a renderizar (la proyectada cuando la fila es el indicador) */
   depth: number
-  isDragActive: boolean
+  /** La fila es el ítem activo del drag → se muestra como indicador de drop */
+  ghost: boolean
+  collapsed: boolean
+  onToggleCollapse: (id: string) => void
   onEdit: (cat: Category) => void
   onDelete: (cat: Category) => void
   onAddChild: (parent: Category) => void
 }
 
-function CategoryNode({
-  cat,
+function CategoryRow({
+  item,
   depth,
-  isDragActive,
+  ghost,
+  collapsed,
+  onToggleCollapse,
   onEdit,
   onDelete,
   onAddChild,
-}: CategoryNodeProps) {
-  const [expanded, setExpanded] = useState(true)
+}: CategoryRowProps) {
+  const cat = item.category
   const hasChildren = cat.children.length > 0
 
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: cat.id })
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id: item.id,
+  })
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
   }
 
+  // Indicador de drop: línea con la sangría proyectada (estilo Notion)
+  if (ghost) {
+    return (
+      <div ref={setNodeRef} style={style} className="py-1.5" aria-hidden>
+        <div
+          className="relative h-1.5 rounded-full bg-primary/60"
+          style={{ marginLeft: `${depth * INDENTATION_WIDTH + 4}px` }}
+        >
+          <span className="absolute -left-1 top-1/2 h-3 w-3 -translate-y-1/2 rounded-full border-2 border-primary bg-background" />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div ref={setNodeRef} style={style}>
       <div
-        className={[
-          "flex items-center gap-1.5 rounded-md py-1.5 pr-2 group transition-colors hover:bg-muted/50",
-          isDragging ? "opacity-40" : "",
-        ].join(" ")}
-        style={{ paddingLeft: `${depth * 20 + 4}px` }}
+        className="flex items-center gap-1.5 rounded-md py-1.5 pr-2 group transition-colors hover:bg-muted/50"
+        style={{ paddingLeft: `${depth * INDENTATION_WIDTH + 4}px` }}
       >
-        {/* Handle de arrastre */}
+        {/* Handle de arrastre (accesible por teclado) */}
         <button
-          className="cursor-grab touch-none text-muted-foreground opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity flex-shrink-0"
-          {...listeners}
+          className="cursor-grab touch-none text-muted-foreground opacity-0 group-hover:opacity-60 focus-visible:opacity-100 hover:opacity-100 transition-opacity flex-shrink-0"
           {...attributes}
-          aria-label="Arrastrar para reordenar"
+          {...listeners}
+          aria-label={`Arrastrar "${cat.name}" para reordenar`}
           type="button"
-          tabIndex={-1}
         >
           <GripVertical className="h-4 w-4" />
         </button>
@@ -259,15 +272,15 @@ function CategoryNode({
         {/* Toggle expandir / colapsar */}
         <button
           className="h-5 w-5 flex items-center justify-center text-muted-foreground hover:text-foreground flex-shrink-0"
-          onClick={() => setExpanded(!expanded)}
+          onClick={() => onToggleCollapse(item.id)}
           type="button"
-          aria-label={expanded ? "Colapsar" : "Expandir"}
+          aria-label={collapsed ? "Expandir" : "Colapsar"}
         >
           {hasChildren ? (
-            expanded ? (
-              <ChevronDown className="h-3.5 w-3.5" />
-            ) : (
+            collapsed ? (
               <ChevronRight className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5" />
             )
           ) : (
             <span className="h-3.5 w-3.5 block" />
@@ -349,23 +362,6 @@ function CategoryNode({
           </Tooltip>
         </div>
       </div>
-
-      {/* Hijos */}
-      {expanded && hasChildren && (
-        <div>
-          {cat.children.map((child) => (
-            <CategoryNode
-              key={child.id}
-              cat={child}
-              depth={depth + 1}
-              isDragActive={isDragActive}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              onAddChild={onAddChild}
-            />
-          ))}
-        </div>
-      )}
     </div>
   )
 }
@@ -374,6 +370,7 @@ function CategoryNode({
 
 export function CategoriesPage() {
   const { storeId } = useParams<{ storeId: string }>()
+  const queryClient = useQueryClient()
 
   const { data: categories, isLoading, isError, refetch } = useCategories(storeId!)
   const { mutateAsync: createCategory, isPending: creating } = useCreateCategory(storeId!)
@@ -386,8 +383,13 @@ export function CategoriesPage() {
   const [editTarget, setEditTarget] = useState<Category | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null)
 
+  // Estado de colapso elevado a la página (Set de ids colapsados)
+  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set())
+
   // Estado del drag activo
   const [activeDragId, setActiveDragId] = useState<string | null>(null)
+  const [overId, setOverId] = useState<string | null>(null)
+  const [offsetLeft, setOffsetLeft] = useState(0)
 
   // Formulario compartido para crear (raíz y subcategoría)
   const createForm = useForm<CategoryFormValues>({
@@ -413,19 +415,43 @@ export function CategoriesPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editTarget])
 
-  // Lista plana para el contexto de DnD
-  const flatItems = useMemo(() => flattenTree(categories ?? []), [categories])
-  const sortableIds = useMemo(() => flatItems.map((i) => i.id), [flatItems])
+  // Lista plana visible: respeta el colapso y, durante el drag, oculta el
+  // subárbol del ítem activo (viaja con él y evita ciclos como destino)
+  const visibleItems = useMemo(
+    () => flattenVisibleTree(categories ?? [], collapsedIds, activeDragId),
+    [categories, collapsedIds, activeDragId]
+  )
+  const sortableIds = useMemo(() => visibleItems.map((i) => i.id), [visibleItems])
 
-  // Nombre del item siendo arrastrado (para el overlay)
-  const activeDragName = useMemo(
-    () => (activeDragId ? flatItems.find((i) => i.id === activeDragId)?.name ?? null : null),
-    [activeDragId, flatItems]
+  // Drop proyectado: profundidad/padre según posición vertical + offset horizontal
+  const projected = useMemo(
+    () =>
+      activeDragId && overId
+        ? getProjection(visibleItems, activeDragId, overId, offsetLeft, INDENTATION_WIDTH)
+        : null,
+    [activeDragId, overId, offsetLeft, visibleItems]
   )
 
-  // Sensores de DnD — activar con 8px de distancia para evitar conflictos con clicks
+  // Ítem activo (para el DragOverlay)
+  const activeItem = useMemo(
+    () => (activeDragId ? visibleItems.find((i) => i.id === activeDragId) ?? null : null),
+    [activeDragId, visibleItems]
+  )
+  const activeDescendants = activeItem ? countDescendants(activeItem.category) : 0
+
+  // Cursor "grabbing" en todo el documento durante el drag
+  useEffect(() => {
+    if (!activeDragId) return
+    document.body.style.setProperty("cursor", "grabbing")
+    return () => {
+      document.body.style.removeProperty("cursor")
+    }
+  }, [activeDragId])
+
+  // Sensores: puntero (8px de distancia para no interferir con clicks) + teclado
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
   // ─── Handlers ───────────────────────────────────────────────────────────────
@@ -494,49 +520,99 @@ export function CategoriesPage() {
     }
   }
 
-  function handleDragStart(event: DragStartEvent) {
-    setActiveDragId(event.active.id as string)
+  function toggleCollapse(id: string) {
+    setCollapsedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
   }
 
-  async function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event
+  function resetDragState() {
     setActiveDragId(null)
+    setOverId(null)
+    setOffsetLeft(0)
+  }
 
-    if (!over || active.id === over.id) return
+  function handleDragStart({ active }: DragStartEvent) {
+    setActiveDragId(active.id as string)
+    setOverId(active.id as string)
+  }
+
+  function handleDragMove({ delta }: DragMoveEvent) {
+    setOffsetLeft(delta.x)
+  }
+
+  function handleDragOver({ over }: DragOverEvent) {
+    setOverId((over?.id as string) ?? null)
+  }
+
+  async function handleDragEnd({ active, over }: DragEndEvent) {
+    const drop = projected
+    resetDragState()
+    if (!drop || !over || !categories || !storeId) return
 
     const activeId = active.id as string
+    const activeNode = findCategory(categories, activeId)
+    if (!activeNode) return
 
-    // Soltar en la zona raíz → convertir en categoría de nivel superior
-    if (over.id === "root-zone") {
-      try {
-        await updateCategory({ id: activeId, data: { parentId: null } })
-        toast.success("Categoría movida a nivel raíz")
-      } catch (err) {
-        toast.error(getErrorMessage(err, "Error al mover la categoría"))
-      }
+    // Protección anti-ciclos: no soltar dentro del propio subárbol
+    // (la lista visible ya excluye a los descendientes; esto es defensa extra)
+    if (
+      drop.parentId === activeId ||
+      (drop.parentId !== null && getDescendantIds(categories, activeId).has(drop.parentId))
+    ) {
       return
     }
 
-    const activeItem = flatItems.find((i) => i.id === activeId)
-    const overItem = flatItems.find((i) => i.id === over.id)
-    if (!activeItem || !overItem) return
+    // No-op: mismo padre y mismo hermano anterior → no hay nada que hacer
+    const currentSiblings = activeNode.parentId
+      ? findCategory(categories, activeNode.parentId)?.children ?? []
+      : categories
+    const currentIndex = currentSiblings.findIndex((c) => c.id === activeId)
+    const currentPrevId = currentIndex > 0 ? currentSiblings[currentIndex - 1].id : null
+    if (drop.parentId === activeNode.parentId && drop.insertAfterId === currentPrevId) return
 
-    if (activeItem.parentId === overItem.parentId) {
-      // Mismo nivel → reordenar usando el sortOrder del destino
-      try {
-        await updateCategory({ id: activeId, data: { sortOrder: overItem.sortOrder } })
+    // sortOrder posicionando al ítem entre los hermanos del nuevo padre
+    const newSiblings = (
+      drop.parentId ? findCategory(categories, drop.parentId)?.children ?? [] : categories
+    ).filter((c) => c.id !== activeId)
+    const sortOrder = computeSortOrder(newSiblings, drop.insertAfterId)
+
+    // Expandir el nuevo padre para que el ítem quede visible tras el drop
+    if (drop.parentId && collapsedIds.has(drop.parentId)) {
+      const parentId = drop.parentId
+      setCollapsedIds((prev) => {
+        const next = new Set(prev)
+        next.delete(parentId)
+        return next
+      })
+    }
+
+    // Update optimista: el árbol se actualiza al instante, sin snap-back
+    const queryKey = ["stores", storeId, "categories"]
+    const previousTree = queryClient.getQueryData<Category[]>(queryKey)
+    queryClient.setQueryData<Category[]>(
+      queryKey,
+      moveCategoryInTree(categories, activeId, drop.parentId, sortOrder)
+    )
+
+    const parentChanged = drop.parentId !== activeNode.parentId
+    try {
+      await updateCategory({ id: activeId, data: { parentId: drop.parentId, sortOrder } })
+      if (!parentChanged) {
         toast.success("Orden actualizado")
-      } catch (err) {
-        toast.error(getErrorMessage(err, "Error al reordenar"))
+      } else if (drop.parentId === null) {
+        toast.success("Categoría movida a nivel raíz")
+      } else {
+        const parentName = findCategory(categories, drop.parentId)?.name ?? ""
+        toast.success(`Categoría movida dentro de "${parentName}"`)
       }
-    } else {
-      // Nivel diferente → re-parentar: active pasa a ser hijo de over
-      try {
-        await updateCategory({ id: activeId, data: { parentId: over.id as string } })
-        toast.success(`Categoría movida dentro de "${overItem.name}"`)
-      } catch (err) {
-        toast.error(getErrorMessage(err, "Error al reasignar la categoría"))
-      }
+    } catch (err) {
+      // Revertir el update optimista si la mutación falla
+      queryClient.setQueryData(queryKey, previousTree)
+      toast.error(getErrorMessage(err, "Error al mover la categoría"))
     }
   }
 
@@ -568,27 +644,32 @@ export function CategoriesPage() {
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
+        measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
         onDragStart={handleDragStart}
+        onDragMove={handleDragMove}
+        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
+        onDragCancel={resetDragState}
       >
         <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
           <div className="rounded-xl border bg-card">
             <div className="p-3">
-              {/* Zona drop para hacer raíz — visible solo durante drag */}
-              <RootDropZone visible={!!activeDragId} />
-
               {!categories || categories.length === 0 ? (
                 <p className="py-10 text-center text-sm text-muted-foreground">
                   No hay categorías aún. Crea tu primera categoría raíz.
                 </p>
               ) : (
                 <div className="flex flex-col">
-                  {categories.map((cat) => (
-                    <CategoryNode
-                      key={cat.id}
-                      cat={cat}
-                      depth={0}
-                      isDragActive={!!activeDragId}
+                  {visibleItems.map((item) => (
+                    <CategoryRow
+                      key={item.id}
+                      item={item}
+                      depth={
+                        item.id === activeDragId && projected ? projected.depth : item.depth
+                      }
+                      ghost={item.id === activeDragId}
+                      collapsed={collapsedIds.has(item.id)}
+                      onToggleCollapse={toggleCollapse}
                       onEdit={(c) => setEditTarget(c)}
                       onDelete={(c) => setDeleteTarget(c)}
                       onAddChild={(parent) => {
@@ -604,11 +685,17 @@ export function CategoriesPage() {
         </SortableContext>
 
         {/* Overlay visual durante el drag */}
-        <DragOverlay dropAnimation={null}>
-          {activeDragName && (
-            <div className="flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-sm font-medium shadow-lg opacity-95 cursor-grabbing">
+        <DragOverlay dropAnimation={dropAnimationConfig}>
+          {activeItem && (
+            <div className="flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-sm font-medium shadow-lg cursor-grabbing">
               <GripVertical className="h-4 w-4 text-muted-foreground" />
-              {activeDragName}
+              {activeItem.category.name}
+              {activeDescendants > 0 && (
+                <Badge variant="secondary" className="shrink-0">
+                  +{activeDescendants}{" "}
+                  {activeDescendants === 1 ? "subcategoría" : "subcategorías"}
+                </Badge>
+              )}
             </div>
           )}
         </DragOverlay>

@@ -28,7 +28,8 @@ export function updateCategory(
     name?: string
     slug?: string
     description?: string
-    parentId?: string
+    // null = mover a nivel raíz (PATCH distingue entre omitir y limpiar)
+    parentId?: string | null
     sortOrder?: number
   }
 ) {
