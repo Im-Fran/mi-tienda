@@ -4,28 +4,61 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
 import { z } from "zod"
-import { Plus, Trash2 } from "lucide-react"
+import { Plus, Trash2, ChevronLeft, Save, FolderOpen, Tag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Card, CardContent } from "@/components/ui/card"
-import { PageHeader } from "@/components/shared/PageHeader"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner"
 import { ImageUploader } from "@/components/shared/ImageUploader"
-import { useProduct, useCreateProduct, useUpdateProduct, useUploadProductImages, useDeleteProductImage, useSetMainProductImage, useAddVariant, useUpdateVariant, useDeleteVariant } from "@/hooks/useProducts"
+import {
+  useProduct,
+  useCreateProduct,
+  useUpdateProduct,
+  useUploadProductImages,
+  useDeleteProductImage,
+  useSetMainProductImage,
+  useAddVariant,
+  useUpdateVariant,
+  useDeleteVariant,
+} from "@/hooks/useProducts"
 import { useCategories } from "@/hooks/useCategories"
 import { productSchema, variantSchema } from "@/lib/validators"
 import { ApiError } from "@/api/client"
+import { cn } from "@/lib/utils"
 import type { Category } from "@/api/types"
 import type { Resolver } from "react-hook-form"
 
 type ProductForm = z.output<typeof productSchema>
 type VariantForm = z.output<typeof variantSchema> & { id?: string }
+
+// Retorna IDs de todos los ancestros de targetId, o null si no está en este subárbol
+function getAncestorIds(cats: Category[], targetId: string): string[] | null {
+  for (const c of cats) {
+    if (c.id === targetId) return []
+    const sub = getAncestorIds(c.children, targetId)
+    if (sub !== null) return [c.id, ...sub]
+  }
+  return null
+}
+
+// Retorna IDs de todos los descendientes de un nodo
+function getDescendantIds(cat: Category): string[] {
+  return cat.children.flatMap((c) => [c.id, ...getDescendantIds(c)])
+}
+
+function findCategory(cats: Category[], id: string): Category | null {
+  for (const c of cats) {
+    if (c.id === id) return c
+    const found = findCategory(c.children, id)
+    if (found) return found
+  }
+  return null
+}
 
 function CategoryCheckboxTree({
   categories,
@@ -39,16 +72,21 @@ function CategoryCheckboxTree({
   depth?: number
 }) {
   return (
-    <div style={{ paddingLeft: depth * 16 }}>
+    <div className={cn(depth > 0 && "ml-3 border-l border-border pl-3")}>
       {categories.map((cat) => (
         <div key={cat.id}>
-          <div className="flex items-center gap-2 py-1">
+          <div className="flex items-center gap-2 py-1.5 px-1 rounded-md hover:bg-muted/50 transition-colors">
+            {cat.children.length > 0
+              ? <FolderOpen className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              : <Tag className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
             <Checkbox
               id={`cat-${cat.id}`}
               checked={selected.includes(cat.id)}
               onCheckedChange={() => onToggle(cat.id)}
             />
-            <Label htmlFor={`cat-${cat.id}`} className="cursor-pointer">{cat.name}</Label>
+            <Label htmlFor={`cat-${cat.id}`} className="cursor-pointer text-sm font-normal">
+              {cat.name}
+            </Label>
           </div>
           {cat.children.length > 0 && (
             <CategoryCheckboxTree
@@ -72,7 +110,7 @@ export function ProductFormPage() {
   const { data: product, isLoading: loadingProduct } = useProduct(storeId!, id ?? "")
   const { data: categoriesTree } = useCategories(storeId!)
   const { mutateAsync: createProduct, isPending: creating } = useCreateProduct(storeId!)
-  const { mutateAsync: updateProduct, isPending: updating } = useUpdateProduct(storeId!, id ?? "")
+  const { mutateAsync: updateProduct, isPending: updating } = useUpdateProduct(storeId!)
   const { mutateAsync: uploadImages } = useUploadProductImages(storeId!, id ?? "")
   const { mutateAsync: deleteImage } = useDeleteProductImage(storeId!, id ?? "")
   const { mutateAsync: setMainImage } = useSetMainProductImage(storeId!, id ?? "")
@@ -83,7 +121,14 @@ export function ProductFormPage() {
   const [variants, setVariants] = useState<VariantForm[]>([])
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
 
-  const { register, handleSubmit, setValue, watch, formState: { errors }, reset } = useForm<ProductForm>({
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+    reset,
+  } = useForm<ProductForm>({
     resolver: zodResolver(productSchema) as Resolver<ProductForm>,
     defaultValues: { name: "", type: "physical", isActive: true, categoryIds: [] },
   })
@@ -96,31 +141,44 @@ export function ProductFormPage() {
         fullDescription: product.fullDescription ?? "",
         type: product.type,
         isActive: product.isActive,
-        categoryIds: [],
+        categoryIds: product.categoryIds ?? [],
       })
-      setVariants(product.variants.map((v) => ({
-        id: v.id,
-        name: v.name,
-        sku: v.sku ?? "",
-        price: v.price / 100,
-        compareAtPrice: v.compareAtPrice ? v.compareAtPrice / 100 : undefined,
-        stock: v.stock,
-        weight: v.weight ?? undefined,
-        options: v.options.map((o) => ({ optionName: o.optionName, optionValue: o.optionValue })),
-      })))
+      setSelectedCategories(product.categoryIds ?? [])
+      setVariants(
+        product.variants.map((v) => ({
+          id: v.id,
+          name: v.name,
+          sku: v.sku ?? "",
+          price: v.price / 100,
+          compareAtPrice: v.compareAtPrice ? v.compareAtPrice / 100 : undefined,
+          stock: v.stock,
+          weight: v.weight ?? undefined,
+          options: v.options.map((o) => ({ optionName: o.optionName, optionValue: o.optionValue })),
+        }))
+      )
     }
   }, [product, reset])
 
   function toggleCategory(catId: string) {
-    setSelectedCategories((prev) =>
-      prev.includes(catId) ? prev.filter((x) => x !== catId) : [...prev, catId]
-    )
+    const tree = categoriesTree ?? []
+    setSelectedCategories((prev) => {
+      if (prev.includes(catId)) {
+        const cat = findCategory(tree, catId)
+        const descendants = cat ? getDescendantIds(cat) : []
+        return prev.filter((x) => x !== catId && !descendants.includes(x))
+      } else {
+        const ancestors = getAncestorIds(tree, catId) ?? []
+        const toAdd = [catId, ...ancestors].filter((x) => !prev.includes(x))
+        return [...prev, ...toAdd]
+      }
+    })
   }
 
   async function onSubmit(data: ProductForm) {
     try {
       if (isEdit) {
         await updateProduct({
+          id: id!,
           name: data.name,
           shortDescription: data.shortDescription,
           fullDescription: data.fullDescription,
@@ -157,245 +215,329 @@ export function ProductFormPage() {
 
   if (isEdit && loadingProduct) return <LoadingSpinner className="py-16" />
 
-  const images = product?.images.map((img) => ({
-    id: img.id,
-    url: `${import.meta.env.VITE_API_BASE_URL}/cdn/${img.r2Key}`,
-    isMain: img.isMain,
-  })) ?? []
+  const images =
+    product?.images.map((img) => ({
+      id: img.id,
+      url: `${import.meta.env.VITE_API_BASE_URL}/cdn/${img.r2Key}`,
+      isMain: img.isMain,
+    })) ?? []
+
+  const isActive = watch("isActive")
+  const productType = watch("type")
 
   return (
-    <div className="max-w-4xl">
-      <PageHeader title={isEdit ? "Edit Product" : "New Product"} />
+    <div className="max-w-5xl">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-8">
+        <Button variant="ghost" size="icon" className="shrink-0" onClick={() => navigate(-1)}>
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl font-semibold truncate">
+            {isEdit ? (product?.name ?? "Edit Product") : "New Product"}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {isEdit ? "Update product details" : "Add a new product to your store"}
+          </p>
+        </div>
+        <Badge variant={isActive ? "default" : "secondary"} className="shrink-0">
+          {isActive ? "Active" : "Draft"}
+        </Badge>
+        <Button
+          type="button"
+          disabled={creating || updating}
+          onClick={handleSubmit(onSubmit)}
+          className="shrink-0"
+        >
+          <Save className="h-4 w-4 mr-2" />
+          {creating || updating ? "Saving…" : isEdit ? "Save Changes" : "Create Product"}
+        </Button>
+      </div>
 
-      <Tabs defaultValue="general">
-        <TabsList className="mb-6">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="variants">Variants</TabsTrigger>
-          {isEdit && <TabsTrigger value="images">Images</TabsTrigger>}
-          <TabsTrigger value="categories">Categories</TabsTrigger>
-        </TabsList>
-
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <TabsContent value="general" className="space-y-4">
-            <div className="space-y-2">
-              <Label>Name *</Label>
-              <Input {...register("name")} placeholder="Product name" />
-              {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label>Short description</Label>
-              <Textarea {...register("shortDescription")} placeholder="Brief description" rows={2} />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Full description (Markdown)</Label>
-              <Textarea
-                {...register("fullDescription")}
-                placeholder="Supports **markdown** formatting"
-                rows={8}
-                className="font-mono text-sm"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Type</Label>
-              <RadioGroup
-                value={watch("type")}
-                onValueChange={(v) => setValue("type", v as "physical" | "digital")}
-                className="flex gap-4"
-              >
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem value="physical" id="type-physical" />
-                  <Label htmlFor="type-physical">Physical</Label>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Columna izquierda */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Product Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Product Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Name *</Label>
+                  <Input {...register("name")} placeholder="Product name" />
+                  {errors.name && (
+                    <p className="text-sm text-destructive">{errors.name.message}</p>
+                  )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem value="digital" id="type-digital" />
-                  <Label htmlFor="type-digital">Digital</Label>
+                <div className="space-y-2">
+                  <Label>Short description</Label>
+                  <Textarea
+                    {...register("shortDescription")}
+                    placeholder="Brief description"
+                    rows={2}
+                  />
                 </div>
-              </RadioGroup>
-            </div>
+                <div className="space-y-2">
+                  <Label>Full description</Label>
+                  <Textarea
+                    {...register("fullDescription")}
+                    placeholder="Supports **markdown** formatting"
+                    rows={8}
+                    className="font-mono text-sm resize-y"
+                  />
+                  <p className="text-xs text-muted-foreground">Markdown supported</p>
+                </div>
+              </CardContent>
+            </Card>
 
-            <div className="flex items-center gap-3">
-              <Switch
-                id="isActive"
-                checked={watch("isActive")}
-                onCheckedChange={(v) => setValue("isActive", v)}
-              />
-              <Label htmlFor="isActive">Active (visible in storefront)</Label>
-            </div>
-
-            <Button type="submit" disabled={creating || updating}>
-              {creating || updating ? "Saving..." : isEdit ? "Save Changes" : "Create Product"}
-            </Button>
-          </TabsContent>
-        </form>
-
-        <TabsContent value="variants" className="space-y-4">
-          <div className="rounded-md border">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50">
-                <tr>
-                  <th className="text-left px-3 py-2">Name</th>
-                  <th className="text-left px-3 py-2">SKU</th>
-                  <th className="text-left px-3 py-2">Price</th>
-                  <th className="text-left px-3 py-2">Stock</th>
-                  <th className="text-left px-3 py-2">Options</th>
-                  <th className="px-3 py-2"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {variants.map((v, i) => (
-                  <tr key={i} className="border-t">
-                    <td className="px-3 py-2">
-                      <Input
-                        value={v.name}
-                        onChange={(e) => {
-                          const updated = [...variants]
-                          updated[i] = { ...updated[i], name: e.target.value }
-                          setVariants(updated)
-                        }}
-                        className="h-8"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <Input
-                        value={v.sku ?? ""}
-                        onChange={(e) => {
-                          const updated = [...variants]
-                          updated[i] = { ...updated[i], sku: e.target.value }
-                          setVariants(updated)
-                        }}
-                        className="h-8 w-24"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={v.price ?? 0}
-                        onChange={(e) => {
-                          const updated = [...variants]
-                          updated[i] = { ...updated[i], price: parseFloat(e.target.value) || 0 }
-                          setVariants(updated)
-                        }}
-                        className="h-8 w-24"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <Input
-                        type="number"
-                        value={v.stock ?? 0}
-                        onChange={(e) => {
-                          const updated = [...variants]
-                          updated[i] = { ...updated[i], stock: parseInt(e.target.value) || 0 }
-                          setVariants(updated)
-                        }}
-                        className="h-8 w-20"
-                      />
-                    </td>
-                    <td className="px-3 py-2 text-muted-foreground text-xs">
-                      {v.options?.map((o) => `${o.optionName}: ${o.optionValue}`).join(", ") || "-"}
-                    </td>
-                    <td className="px-3 py-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-destructive"
-                        onClick={async () => {
-                          if (v.id && isEdit) {
-                            await deleteVariant(v.id)
+            {/* Variants */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Variants</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-md border">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        <th className="text-left px-3 py-2">Name</th>
+                        <th className="text-left px-3 py-2">SKU</th>
+                        <th className="text-left px-3 py-2">Price</th>
+                        <th className="text-left px-3 py-2">Stock</th>
+                        <th className="text-left px-3 py-2">Options</th>
+                        <th className="px-3 py-2"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {variants.map((v, i) => (
+                        <tr key={i} className="border-t">
+                          <td className="px-3 py-2">
+                            <Input
+                              value={v.name}
+                              onChange={(e) => {
+                                const updated = [...variants]
+                                updated[i] = { ...updated[i], name: e.target.value }
+                                setVariants(updated)
+                              }}
+                              className="h-8"
+                            />
+                          </td>
+                          <td className="px-3 py-2">
+                            <Input
+                              value={v.sku ?? ""}
+                              onChange={(e) => {
+                                const updated = [...variants]
+                                updated[i] = { ...updated[i], sku: e.target.value }
+                                setVariants(updated)
+                              }}
+                              className="h-8 w-24"
+                            />
+                          </td>
+                          <td className="px-3 py-2">
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={v.price ?? 0}
+                              onChange={(e) => {
+                                const updated = [...variants]
+                                updated[i] = { ...updated[i], price: parseFloat(e.target.value) || 0 }
+                                setVariants(updated)
+                              }}
+                              className="h-8 w-24"
+                            />
+                          </td>
+                          <td className="px-3 py-2">
+                            <Input
+                              type="number"
+                              value={v.stock ?? 0}
+                              onChange={(e) => {
+                                const updated = [...variants]
+                                updated[i] = { ...updated[i], stock: parseInt(e.target.value) || 0 }
+                                setVariants(updated)
+                              }}
+                              className="h-8 w-20"
+                            />
+                          </td>
+                          <td className="px-3 py-2 text-muted-foreground text-xs">
+                            {v.options?.map((o) => `${o.optionName}: ${o.optionValue}`).join(", ") || "-"}
+                          </td>
+                          <td className="px-3 py-2">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-destructive"
+                              onClick={async () => {
+                                if (v.id && isEdit) {
+                                  await deleteVariant(v.id)
+                                }
+                                setVariants(variants.filter((_, j) => j !== i))
+                              }}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setVariants([
+                        ...variants,
+                        { name: "New Variant", price: 0, stock: 0, options: [] },
+                      ])
+                    }
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Variant
+                  </Button>
+                  {isEdit && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={async () => {
+                        for (const v of variants) {
+                          if (v.id) {
+                            await updateVariant({
+                              variantId: v.id,
+                              data: {
+                                name: v.name,
+                                sku: v.sku || undefined,
+                                price: Math.round((v.price ?? 0) * 100),
+                                stock: v.stock ?? 0,
+                              },
+                            })
+                          } else {
+                            await addVariant({
+                              name: v.name,
+                              sku: v.sku || undefined,
+                              price: Math.round((v.price ?? 0) * 100),
+                              stock: v.stock ?? 0,
+                              options: v.options ?? [],
+                            })
                           }
-                          setVariants(variants.filter((_, j) => j !== i))
-                        }}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        }
+                        toast.success("Variants saved")
+                      }}
+                    >
+                      Save Variants
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Images (solo en edición) */}
+            {isEdit && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Images</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ImageUploader
+                    value={images}
+                    multiple
+                    onUpload={async (files) => {
+                      await uploadImages(files)
+                      toast.success("Images uploaded")
+                    }}
+                    onDelete={async (imgId) => {
+                      await deleteImage(imgId)
+                      toast.success("Image deleted")
+                    }}
+                    onSetMain={async (imgId) => {
+                      await setMainImage(imgId)
+                      toast.success("Main image updated")
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            )}
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              setVariants([...variants, { name: "New Variant", price: 0, stock: 0, options: [] }])
-            }
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Variant
-          </Button>
-          {isEdit && (
-            <Button
-              onClick={async () => {
-                for (const v of variants) {
-                  if (v.id) {
-                    await updateVariant({
-                      variantId: v.id,
-                      data: {
-                        name: v.name,
-                        sku: v.sku || undefined,
-                        price: Math.round((v.price ?? 0) * 100),
-                        stock: v.stock ?? 0,
-                      },
-                    })
-                  } else {
-                    await addVariant({
-                      name: v.name,
-                      sku: v.sku || undefined,
-                      price: Math.round((v.price ?? 0) * 100),
-                      stock: v.stock ?? 0,
-                      options: v.options ?? [],
-                    })
-                  }
-                }
-                toast.success("Variants saved")
-              }}
-            >
-              Save Variants
-            </Button>
-          )}
-        </TabsContent>
 
-        {isEdit && (
-          <TabsContent value="images">
-            <ImageUploader
-              value={images}
-              multiple
-              onUpload={async (files) => {
-                await uploadImages(files)
-                toast.success("Images uploaded")
-              }}
-              onDelete={async (imgId) => {
-                await deleteImage(imgId)
-                toast.success("Image deleted")
-              }}
-              onSetMain={async (imgId) => {
-                await setMainImage(imgId)
-                toast.success("Main image updated")
-              }}
-            />
-          </TabsContent>
-        )}
+          {/* Sidebar derecho */}
+          <div className="space-y-6">
+            {/* Status */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">{isActive ? "Active" : "Draft"}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {isActive ? "Visible in storefront" : "Hidden from customers"}
+                    </p>
+                  </div>
+                  <Switch
+                    id="isActive"
+                    checked={isActive}
+                    onCheckedChange={(v) => setValue("isActive", v)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-        <TabsContent value="categories">
-          <Card>
-            <CardContent className="pt-4">
-              {categoriesTree && categoriesTree.length > 0 ? (
-                <CategoryCheckboxTree
-                  categories={categoriesTree}
-                  selected={selectedCategories}
-                  onToggle={toggleCategory}
-                />
-              ) : (
-                <p className="text-muted-foreground text-sm">No categories yet.</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            {/* Product Type */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Product Type</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {(["physical", "digital"] as const).map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setValue("type", type)}
+                    className={cn(
+                      "w-full text-left px-3 py-2.5 rounded-md border text-sm transition-colors",
+                      productType === type
+                        ? "border-primary bg-primary/5 font-medium"
+                        : "border-border hover:bg-muted/50"
+                    )}
+                  >
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </button>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Categories */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Categories</CardTitle>
+                  {selectedCategories.length > 0 && (
+                    <Badge variant="secondary">{selectedCategories.length}</Badge>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                {categoriesTree && categoriesTree.length > 0 ? (
+                  <div className="max-h-72 overflow-y-auto">
+                    <CategoryCheckboxTree
+                      categories={categoriesTree}
+                      selected={selectedCategories}
+                      onToggle={toggleCategory}
+                    />
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No categories yet.</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </form>
     </div>
   )
 }

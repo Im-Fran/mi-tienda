@@ -40,7 +40,7 @@ export function ProductsPage() {
   }
 
   const { data, isLoading, isError, refetch } = useProducts(storeId!, params)
-  const { mutate: updateProduct } = useUpdateProduct(storeId!, "")
+  const { mutate: updateProduct } = useUpdateProduct(storeId!)
   const { mutate: deleteProduct, isPending: deleting } = useDeleteProduct(storeId!)
 
   if (isLoading) return <LoadingSpinner className="py-16" />
@@ -48,7 +48,7 @@ export function ProductsPage() {
 
   function handleToggleActive(product: Product) {
     updateProduct(
-      { isActive: !product.isActive },
+      { id: product.id, isActive: !product.isActive },
       {
         onError: (err) => {
           const msg = err instanceof ApiError ? err.message : "Update failed"
