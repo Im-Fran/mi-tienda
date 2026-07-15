@@ -304,7 +304,7 @@ function CategoryRow({
           <div className="flex items-center gap-2 min-w-0">
             <span className="text-sm font-medium truncate">{cat.name}</span>
             <span className="text-xs text-muted-foreground shrink-0 tabular-nums">
-              /{cat.slug}
+              {item.slugPath}
             </span>
             {hasChildren && (
               <Badge variant="secondary" className="shrink-0">
