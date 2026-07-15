@@ -57,7 +57,7 @@ export function StorefrontHomePage() {
   // For storefront, we need to find storeId from slug
   const storeId = store?.id
 
-  const { data, isLoading, isError } = useProducts(storeId ?? "", { perPage: 8, active: "true" })
+  const { data, isLoading, isError, error } = useProducts(storeId ?? "", { perPage: 8, active: "true" })
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -76,7 +76,7 @@ export function StorefrontHomePage() {
         {isLoading ? (
           <LoadingSpinner className="py-8" />
         ) : isError ? (
-          <ErrorState message="Failed to load products" />
+          <ErrorState message="Failed to load products" error={error} />
         ) : !data?.products?.length ? (
           <p className="text-muted-foreground">No products available yet.</p>
         ) : (

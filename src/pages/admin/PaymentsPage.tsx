@@ -33,7 +33,7 @@ export function PaymentsPage() {
   const [editTarget, setEditTarget] = useState<PaymentMethod | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<PaymentMethod | null>(null)
 
-  const { data: methods, isLoading, isError, refetch } = usePaymentMethods(storeId!)
+  const { data: methods, isLoading, isError, error, refetch } = usePaymentMethods(storeId!)
   const { mutateAsync: createMethod, isPending: creating } = useCreatePaymentMethod(storeId!)
   const { mutateAsync: updateMethod, isPending: updating } = useUpdatePaymentMethod(storeId!)
   const { mutate: deleteMethod, isPending: deleting } = useDeletePaymentMethod(storeId!)
@@ -97,7 +97,7 @@ export function PaymentsPage() {
   }
 
   if (isLoading) return <LoadingSpinner className="py-16" />
-  if (isError) return <ErrorState message="Failed to load payment methods" retry={refetch} />
+  if (isError) return <ErrorState message="Failed to load payment methods" error={error} retry={refetch} />
 
   return (
     <div className="max-w-2xl">

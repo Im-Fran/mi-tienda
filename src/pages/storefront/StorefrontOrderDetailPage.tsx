@@ -13,13 +13,13 @@ import { formatDate, formatCurrency, truncate } from "@/lib/utils"
 export function StorefrontOrderDetailPage() {
   const { storeSlug, id } = useParams<{ storeSlug: string; id: string }>()
   const navigate = useNavigate()
-  const { data: order, isLoading, isError, refetch } = useMyOrder(id!)
+  const { data: order, isLoading, isError, error, refetch } = useMyOrder(id!)
   const { data: stores } = useStores()
   const store = stores?.find((s) => s.slug === storeSlug)
   const { data: settings } = useStoreSettings(store?.id ?? "")
 
   if (isLoading) return <LoadingSpinner className="py-16" />
-  if (isError || !order) return <ErrorState message="Order not found" retry={refetch} />
+  if (isError || !order) return <ErrorState message="Order not found" error={error} retry={refetch} />
 
   const symbol = settings?.currencySymbol ?? "$"
   const decimals = settings?.decimalPlaces ?? 2

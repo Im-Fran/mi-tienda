@@ -60,7 +60,7 @@ export function ProductsListPage() {
   const storeId = store?.id ?? ""
 
   const { data: categoriesData } = useCategories(storeId)
-  const { data, isLoading, isError, refetch } = useProducts(storeId, {
+  const { data, isLoading, isError, error, refetch } = useProducts(storeId, {
     search: search || undefined,
     category: selectedCategories[0],
     active: "true",
@@ -118,7 +118,7 @@ export function ProductsListPage() {
           {isLoading ? (
             <LoadingSpinner className="py-16" />
           ) : isError ? (
-            <ErrorState message="Failed to load products" retry={refetch} />
+            <ErrorState message="Failed to load products" error={error} retry={refetch} />
           ) : !data?.products?.length ? (
             <EmptyState message="No products found." />
           ) : (

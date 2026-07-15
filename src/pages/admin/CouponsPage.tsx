@@ -37,7 +37,7 @@ export function CouponsPage() {
   const [editTarget, setEditTarget] = useState<Coupon | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Coupon | null>(null)
 
-  const { data, isLoading, isError, refetch } = useCoupons(storeId!, page)
+  const { data, isLoading, isError, error, refetch } = useCoupons(storeId!, page)
   const { mutateAsync: createCoupon, isPending: creating } = useCreateCoupon(storeId!)
   const { mutateAsync: updateCoupon, isPending: updating } = useUpdateCoupon(storeId!)
   const { mutate: deleteCoupon, isPending: deleting } = useDeleteCoupon(storeId!)
@@ -89,7 +89,7 @@ export function CouponsPage() {
   }
 
   if (isLoading) return <LoadingSpinner className="py-16" />
-  if (isError) return <ErrorState message="Failed to load coupons" retry={refetch} />
+  if (isError) return <ErrorState message="Failed to load coupons" error={error} retry={refetch} />
 
   const columns: Column<Coupon>[] = [
     { key: "code", header: "Code", cell: (c) => <code className="font-mono text-sm bg-muted px-1 rounded">{c.code}</code> },

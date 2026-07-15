@@ -14,10 +14,10 @@ export function OrderHistoryPage() {
   const { storeSlug } = useParams<{ storeSlug: string }>()
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
-  const { data, isLoading, isError, refetch } = useMyOrders(page)
+  const { data, isLoading, isError, error, refetch } = useMyOrders(page)
 
   if (isLoading) return <LoadingSpinner className="py-16" />
-  if (isError) return <ErrorState message="Failed to load orders" retry={refetch} />
+  if (isError) return <ErrorState message="Failed to load orders" error={error} retry={refetch} />
 
   const columns: Column<Order>[] = [
     { key: "id", header: "Order", cell: (o) => <span className="font-mono text-xs">{truncate(o.id, 12)}</span> },

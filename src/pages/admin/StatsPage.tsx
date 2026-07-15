@@ -31,7 +31,7 @@ export function StatsPage() {
   const [params, setParams] = useState<{ from?: string; to?: string }>({})
 
   const { data: settings } = useStoreSettings(storeId!)
-  const { data: summary, isLoading: loadingSummary, isError } = useStatsSummary(storeId!, params)
+  const { data: summary, isLoading: loadingSummary, isError, error } = useStatsSummary(storeId!, params)
   const { data: topProducts, isLoading: loadingTop } = useTopProducts(storeId!, params)
   const { data: byStatus, isLoading: loadingStatus } = useOrdersByStatus(storeId!, params)
   const { data: revenue, isLoading: loadingRevenue } = useRevenueOverTime(storeId!, params)
@@ -43,7 +43,7 @@ export function StatsPage() {
     setParams({ from: from || undefined, to: to || undefined })
   }
 
-  if (isError) return <ErrorState message="Failed to load stats" />
+  if (isError) return <ErrorState message="Failed to load stats" error={error} />
 
   return (
     <div>

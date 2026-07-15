@@ -27,7 +27,7 @@ export function CartPage() {
   const storeId = store?.id ?? ""
 
   const { data: settings } = useStoreSettings(storeId)
-  const { data: cart, isLoading, isError, refetch } = useCart(storeId)
+  const { data: cart, isLoading, isError, error, refetch } = useCart(storeId)
   const { mutateAsync: updateItem } = useUpdateCartItem(storeId)
   const { mutateAsync: removeItem } = useRemoveCartItem(storeId)
   const { mutateAsync: applyCoupon, isPending: applyingCoupon } = useApplyCoupon(storeId)
@@ -50,7 +50,7 @@ export function CartPage() {
   }
 
   if (isLoading) return <LoadingSpinner className="py-16" />
-  if (isError) return <ErrorState message="Failed to load cart" retry={refetch} />
+  if (isError) return <ErrorState message="Failed to load cart" error={error} retry={refetch} />
 
   const items = cart?.items ?? []
   const subtotal = items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0)
