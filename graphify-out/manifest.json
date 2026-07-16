@@ -460,9 +460,9 @@
     "semantic_hash": "51a10ed85ec072be665b0ca5d60afa67"
   },
   "src/pages/admin/SettingsPage.tsx": {
-    "mtime": 1784163800.076211,
-    "ast_hash": "d590e7edb466dd28094894dd27429c9b",
-    "semantic_hash": "d590e7edb466dd28094894dd27429c9b"
+    "mtime": 1784163901.114823,
+    "ast_hash": "68f03cab150e3b280f91fcf96d3a3751",
+    "semantic_hash": ""
   },
   "src/pages/admin/ShippingPage.tsx": {
     "mtime": 1784163800.0763423,
