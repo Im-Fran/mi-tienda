@@ -44,12 +44,12 @@ export function useCreateProduct(storeId: string) {
   })
 }
 
-export function useUpdateProduct(storeId: string, id: string) {
+export function useUpdateProduct(storeId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (data: Parameters<typeof updateProduct>[2]) =>
+    mutationFn: ({ id, ...data }: { id: string } & Parameters<typeof updateProduct>[2]) =>
       updateProduct(storeId, id, data),
-    onSuccess: () => {
+    onSuccess: (_, { id }) => {
       qc.invalidateQueries({ queryKey: ["stores", storeId, "products"] })
       qc.invalidateQueries({ queryKey: ["stores", storeId, "products", id] })
     },
