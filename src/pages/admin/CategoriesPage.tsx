@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react"
+import React, { useState, useEffect, useMemo, useRef } from "react"
 import { useParams } from "react-router-dom"
 import { toast } from "sonner"
 import { useForm } from "react-hook-form"
@@ -140,16 +140,24 @@ interface FormFieldsProps {
 
 function CategoryFormFields({ form, isLoading, fieldPrefix = "cat" }: FormFieldsProps) {
   const watchedName = form.watch("name")
+  // ponytail: ref evita re-renders; se sincroniza con defaultValues para detectar reset() del form
+  const slugLocked = useRef(false)
 
-  // Auto-generar slug desde el nombre solo cuando el campo está vacío
+  // Al hacer reset() cambian los defaultValues: si el slug ya tiene valor (modo editar) → lock
+  const defaultSlug = (form.formState.defaultValues as { slug?: string } | undefined)?.slug ?? ""
   useEffect(() => {
-    const currentSlug = form.getValues("slug")
-    if (!currentSlug) {
+    slugLocked.current = !!defaultSlug
+  }, [defaultSlug])
+
+  // Auto-generar slug mientras el usuario escribe el nombre, salvo que esté lockeado
+  useEffect(() => {
+    if (!slugLocked.current) {
       form.setValue("slug", slugify(watchedName), { shouldValidate: false })
     }
-  // Solo reaccionar al cambio de nombre
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedName])
+
+  const { onChange: slugOnChange, ...slugRegisterRest } = form.register("slug")
 
   return (
     <div className="flex flex-col gap-4 py-2">
@@ -175,7 +183,11 @@ function CategoryFormFields({ form, isLoading, fieldPrefix = "cat" }: FormFields
           placeholder="auto-generado desde el nombre"
           disabled={isLoading}
           aria-invalid={!!form.formState.errors.slug}
-          {...form.register("slug")}
+          {...slugRegisterRest}
+          onChange={(e) => {
+            slugLocked.current = true
+            slugOnChange(e)
+          }}
         />
         {form.formState.errors.slug && (
           <p className="text-xs text-destructive">{form.formState.errors.slug.message}</p>
@@ -288,7 +300,7 @@ function CategoryRow({
           <div className="flex items-center gap-2 min-w-0">
             <span className="text-sm font-medium truncate">{cat.name}</span>
             <span className="text-xs text-muted-foreground shrink-0 tabular-nums">
-              /{cat.slug}
+              {item.slugPath}
             </span>
             {hasChildren && (
               <Badge variant="secondary" className="shrink-0">

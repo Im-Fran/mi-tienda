@@ -165,6 +165,7 @@ export interface Product {
   isActive: boolean
   variants: ProductVariant[]
   images: ProductImage[]
+  categoryIds?: string[]
   createdAt: number
   updatedAt: number
 }

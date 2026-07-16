@@ -16,6 +16,8 @@ export interface FlatCategory {
   parentId: string | null
   depth: number
   category: Category
+  /** Path completo de slugs desde la raiz, ej. "/macbook/air" */
+  slugPath: string
 }
 
 export interface ProjectedDrop {
@@ -38,15 +40,17 @@ export function flattenVisibleTree(
   categories: Category[],
   collapsedIds: ReadonlySet<string>,
   excludeSubtreeId: string | null = null,
-  depth = 0
+  depth = 0,
+  parentSlugPath = ""
 ): FlatCategory[] {
   const result: FlatCategory[] = []
   for (const cat of categories) {
-    result.push({ id: cat.id, parentId: cat.parentId, depth, category: cat })
+    const slugPath = `${parentSlugPath}/${cat.slug}`
+    result.push({ id: cat.id, parentId: cat.parentId, depth, category: cat, slugPath })
     const hideChildren = collapsedIds.has(cat.id) || cat.id === excludeSubtreeId
     if (cat.children.length > 0 && !hideChildren) {
       result.push(
-        ...flattenVisibleTree(cat.children, collapsedIds, excludeSubtreeId, depth + 1)
+        ...flattenVisibleTree(cat.children, collapsedIds, excludeSubtreeId, depth + 1, slugPath)
       )
     }
   }
