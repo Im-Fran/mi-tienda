@@ -27,7 +27,7 @@ export function SystemRolesPage() {
   const [selectedPermId, setSelectedPermId] = useState("")
   const qc = useQueryClient()
 
-  const { data: rolesData, isLoading, isError, refetch } = useQuery({
+  const { data: rolesData, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["admin", "roles"],
     queryFn: () => apiClient.get<{ roles: RoleWithPermissions[] }>("/api/admin/roles"),
     staleTime: 60_000,
@@ -67,7 +67,7 @@ export function SystemRolesPage() {
   })
 
   if (isLoading) return <LoadingSpinner className="py-16" />
-  if (isError) return <ErrorState message="Failed to load roles" retry={refetch} />
+  if (isError) return <ErrorState message="Failed to load roles" error={error} retry={refetch} />
 
   return (
     <div className="max-w-3xl">

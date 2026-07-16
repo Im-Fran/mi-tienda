@@ -24,13 +24,13 @@ const ALL_STATUSES: OrderStatus[] = [
 export function OrderDetailPage() {
   const { storeId, id } = useParams<{ storeId: string; id: string }>()
   const navigate = useNavigate()
-  const { data: order, isLoading, isError, refetch } = useOrder(storeId!, id!)
+  const { data: order, isLoading, isError, error, refetch } = useOrder(storeId!, id!)
   const { data: settings } = useStoreSettings(storeId!)
   const { data: paymentMethods } = usePaymentMethods(storeId!)
   const { mutate: updateStatus } = useUpdateOrderStatus(storeId!, id!)
 
   if (isLoading) return <LoadingSpinner className="py-16" />
-  if (isError || !order) return <ErrorState message="Order not found" retry={refetch} />
+  if (isError || !order) return <ErrorState message="Order not found" error={error} retry={refetch} />
 
   const symbol = settings?.currencySymbol ?? "$"
   const decimals = settings?.decimalPlaces ?? 2

@@ -30,7 +30,7 @@ export function AccountPage() {
   const [editAddress, setEditAddress] = useState<CustomerAddress | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<CustomerAddress | null>(null)
 
-  const { data: customer, isLoading, isError, refetch } = useMyProfile()
+  const { data: customer, isLoading, isError, error, refetch } = useMyProfile()
   const { data: addresses, isLoading: loadingAddresses } = useMyAddresses()
   const { mutateAsync: createAddress } = useCreateAddress()
   const { mutateAsync: updateAddress } = useUpdateAddress()
@@ -77,7 +77,7 @@ export function AccountPage() {
   }
 
   if (isLoading) return <LoadingSpinner className="py-16" />
-  if (isError || !customer) return <ErrorState message="Failed to load profile" retry={refetch} />
+  if (isError || !customer) return <ErrorState message="Failed to load profile" error={error} retry={refetch} />
 
   const initials = customer.name
     ? customer.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)

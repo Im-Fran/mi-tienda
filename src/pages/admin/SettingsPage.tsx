@@ -36,7 +36,7 @@ type StoreForm = z.infer<typeof storeSchema>
 
 export function SettingsPage() {
   const { storeId } = useParams<{ storeId: string }>()
-  const { data: settings, isLoading: loadingSettings, isError, refetch } = useStoreSettings(storeId!)
+  const { data: settings, isLoading: loadingSettings, isError, error, refetch } = useStoreSettings(storeId!)
   const { data: store, isLoading: loadingStore } = useStore(storeId!)
   const { mutateAsync: updateSettings, isPending: savingSettings } = useUpdateStoreSettings(storeId!)
   const { mutateAsync: updateStore, isPending: savingStore } = useUpdateStore(storeId!)
@@ -71,7 +71,7 @@ export function SettingsPage() {
   }, [store, resetStore])
 
   if (loadingSettings || loadingStore) return <LoadingSpinner className="py-16" />
-  if (isError) return <ErrorState message="Failed to load settings" retry={refetch} />
+  if (isError) return <ErrorState message="Failed to load settings" error={error} retry={refetch} />
 
   async function onSaveSettings(data: SettingsForm) {
     try {

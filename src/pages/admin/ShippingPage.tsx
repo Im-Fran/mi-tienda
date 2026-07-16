@@ -32,7 +32,7 @@ export function ShippingPage() {
   const [editTarget, setEditTarget] = useState<ShippingMethod | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<ShippingMethod | null>(null)
 
-  const { data: methods, isLoading, isError, refetch } = useShippingMethods(storeId!)
+  const { data: methods, isLoading, isError, error, refetch } = useShippingMethods(storeId!)
   const { mutateAsync: createMethod, isPending: creating } = useCreateShippingMethod(storeId!)
   const { mutateAsync: updateMethod, isPending: updating } = useUpdateShippingMethod(storeId!)
   const { mutate: deleteMethod, isPending: deleting } = useDeleteShippingMethod(storeId!)
@@ -79,7 +79,7 @@ export function ShippingPage() {
   }
 
   if (isLoading) return <LoadingSpinner className="py-16" />
-  if (isError) return <ErrorState message="Failed to load shipping methods" retry={refetch} />
+  if (isError) return <ErrorState message="Failed to load shipping methods" error={error} retry={refetch} />
 
   return (
     <div className="max-w-2xl">

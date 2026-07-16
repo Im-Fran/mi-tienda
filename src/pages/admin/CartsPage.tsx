@@ -16,11 +16,11 @@ import type { Cart } from "@/api/types"
 function CartsTab({ storeId, status }: { storeId: string; status: 'active' | 'abandoned' | 'completed' }) {
   const [page, setPage] = useState(1)
   const [selectedCartId, setSelectedCartId] = useState<string | null>(null)
-  const { data, isLoading, isError, refetch } = useAdminCarts(storeId, { status, page })
+  const { data, isLoading, isError, error, refetch } = useAdminCarts(storeId, { status, page })
   const { data: cartDetail } = useAdminCart(storeId, selectedCartId ?? "")
 
   if (isLoading) return <LoadingSpinner className="py-8" />
-  if (isError) return <ErrorState message="Failed to load carts" retry={refetch} />
+  if (isError) return <ErrorState message="Failed to load carts" error={error} retry={refetch} />
 
   const columns: Column<Cart>[] = [
     { key: "id", header: "Cart ID", cell: (c) => <span className="font-mono text-xs">{truncate(c.id, 12)}</span> },

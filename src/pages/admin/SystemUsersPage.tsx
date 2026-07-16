@@ -24,7 +24,7 @@ export function SystemUsersPage() {
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
   const qc = useQueryClient()
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["admin", "users", page],
     queryFn: () => apiClient.get<{ users: User[]; pagination: import("@/api/types").Pagination }>(`/api/admin/users?page=${page}`),
     staleTime: 30_000,
@@ -51,7 +51,7 @@ export function SystemUsersPage() {
   })
 
   if (isLoading) return <LoadingSpinner className="py-16" />
-  if (isError) return <ErrorState message="Failed to load users" retry={refetch} />
+  if (isError) return <ErrorState message="Failed to load users" error={error} retry={refetch} />
 
   const columns: Column<User>[] = [
     { key: "name", header: "Name", cell: (u) => u.name ?? "-" },

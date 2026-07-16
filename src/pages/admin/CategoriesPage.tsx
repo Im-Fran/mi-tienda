@@ -71,7 +71,7 @@ import {
   type FlatCategory,
 } from "@/lib/categoryTree"
 import type { Category } from "@/api/types"
-import { ApiError } from "@/api/client"
+import { getErrorMessage } from "@/lib/errors"
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
@@ -98,10 +98,6 @@ function slugify(value: string): string {
     .trim()
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
-}
-
-function getErrorMessage(err: unknown, fallback: string): string {
-  return err instanceof ApiError ? err.message : fallback
 }
 
 // ─── Constantes de DnD ────────────────────────────────────────────────────────
@@ -383,7 +379,7 @@ function CategoryRow({
 export function CategoriesPage() {
   const { storeId } = useParams<{ storeId: string }>()
 
-  const { data: categories, isLoading, isError, refetch } = useCategories(storeId!)
+  const { data: categories, isLoading, isError, error, refetch } = useCategories(storeId!)
   const { mutateAsync: createCategory, isPending: creating } = useCreateCategory(storeId!)
   const { mutateAsync: updateCategory, isPending: updating } = useUpdateCategory(storeId!)
   const { mutateAsync: deleteCategory, isPending: deleting } = useDeleteCategory(storeId!)
@@ -633,7 +629,7 @@ export function CategoriesPage() {
   // ─── Estados de carga y error ────────────────────────────────────────────────
 
   if (isLoading) return <LoadingSpinner className="py-16" />
-  if (isError) return <ErrorState message="Error al cargar las categorías" retry={refetch} />
+  if (isError) return <ErrorState message="Error al cargar las categorías" error={error} retry={refetch} />
 
   // ─── Render ──────────────────────────────────────────────────────────────────
 

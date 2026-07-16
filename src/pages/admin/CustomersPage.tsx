@@ -13,10 +13,10 @@ export function CustomersPage() {
   const { storeId } = useParams<{ storeId: string }>()
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
-  const { data, isLoading, isError, refetch } = useCustomers(storeId!, page)
+  const { data, isLoading, isError, error, refetch } = useCustomers(storeId!, page)
 
   if (isLoading) return <LoadingSpinner className="py-16" />
-  if (isError) return <ErrorState message="Failed to load customers" retry={refetch} />
+  if (isError) return <ErrorState message="Failed to load customers" error={error} retry={refetch} />
 
   const columns: Column<Customer>[] = [
     {

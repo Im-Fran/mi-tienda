@@ -12,12 +12,12 @@ import { useStores } from "@/hooks/useStores"
 
 export function StoresPage() {
   const navigate = useNavigate()
-  const { data: stores, isLoading, isError, refetch } = useStores()
+  const { data: stores, isLoading, isError, error, refetch } = useStores()
 
   const atLimit = (stores?.length ?? 0) >= 3
 
   if (isLoading) return <LoadingSpinner className="py-16" />
-  if (isError) return <ErrorState message="Failed to load stores" retry={refetch} />
+  if (isError) return <ErrorState message="Failed to load stores" error={error} retry={refetch} />
 
   return (
     <div>

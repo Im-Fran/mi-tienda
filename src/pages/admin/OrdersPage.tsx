@@ -22,13 +22,13 @@ export function OrdersPage() {
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all")
 
-  const { data, isLoading, isError, refetch } = useOrders(storeId!, {
+  const { data, isLoading, isError, error, refetch } = useOrders(storeId!, {
     status: statusFilter !== "all" ? statusFilter : undefined,
     page,
   })
 
   if (isLoading) return <LoadingSpinner className="py-16" />
-  if (isError) return <ErrorState message="Failed to load orders" retry={refetch} />
+  if (isError) return <ErrorState message="Failed to load orders" error={error} retry={refetch} />
 
   const columns: Column<Order>[] = [
     { key: "id", header: "Order ID", cell: (o) => <span className="font-mono text-xs">{truncate(o.id, 12)}</span> },

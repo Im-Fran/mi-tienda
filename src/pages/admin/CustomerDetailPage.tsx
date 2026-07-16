@@ -17,11 +17,11 @@ import type { Order } from "@/api/types"
 export function CustomerDetailPage() {
   const { storeId, id } = useParams<{ storeId: string; id: string }>()
   const navigate = useNavigate()
-  const { data: customer, isLoading, isError, refetch } = useCustomer(storeId!, id!)
+  const { data: customer, isLoading, isError, error, refetch } = useCustomer(storeId!, id!)
   const { data: ordersData } = useOrders(storeId!)
 
   if (isLoading) return <LoadingSpinner className="py-16" />
-  if (isError || !customer) return <ErrorState message="Customer not found" retry={refetch} />
+  if (isError || !customer) return <ErrorState message="Customer not found" error={error} retry={refetch} />
 
   const initials = customer.name
     ? customer.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)

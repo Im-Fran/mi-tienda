@@ -230,10 +230,10 @@ export function ProductDetailPage() {
   const store = stores?.find((s) => s.slug === storeSlug)
   const storeId = store?.id ?? ""
 
-  const { data: product, isLoading, isError, refetch } = useProduct(storeId, id!)
+  const { data: product, isLoading, isError, error, refetch } = useProduct(storeId, id!)
 
   if (isLoading) return <LoadingSpinner className="py-16" />
-  if (isError || !product) return <ErrorState message="Product not found" retry={refetch} />
+  if (isError || !product) return <ErrorState message="Product not found" error={error} retry={refetch} />
 
   return <ProductDetail product={product} storeId={storeId} />
 }

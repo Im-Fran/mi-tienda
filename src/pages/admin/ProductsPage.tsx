@@ -39,12 +39,12 @@ export function ProductsPage() {
     perPage: 20,
   }
 
-  const { data, isLoading, isError, refetch } = useProducts(storeId!, params)
+  const { data, isLoading, isError, error, refetch } = useProducts(storeId!, params)
   const { mutate: updateProduct } = useUpdateProduct(storeId!)
   const { mutate: deleteProduct, isPending: deleting } = useDeleteProduct(storeId!)
 
   if (isLoading) return <LoadingSpinner className="py-16" />
-  if (isError) return <ErrorState message="Failed to load products" retry={refetch} />
+  if (isError) return <ErrorState message="Failed to load products" error={error} retry={refetch} />
 
   function handleToggleActive(product: Product) {
     updateProduct(
