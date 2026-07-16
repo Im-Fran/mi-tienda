@@ -1,16 +1,16 @@
-# Graph Report - mi-tienda  (2026-07-04)
+# Graph Report - error-detail-states  (2026-07-15)
 
 ## Corpus Check
-- 115 files · ~40,791 words
+- 119 files · ~41,393 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 867 nodes · 962 edges · 102 communities (65 shown, 37 thin omitted)
+- 866 nodes · 961 edges · 102 communities (63 shown, 39 thin omitted)
 - Extraction: 78% EXTRACTED · 22% INFERRED · 0% AMBIGUOUS · INFERRED: 212 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `dce24205`
+- Built from commit: `53d3de80`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -106,13 +106,15 @@
 3. `compilerOptions` - 20 edges
 4. `compilerOptions` - 16 edges
 5. `compilerOptions` - 16 edges
-6. `useStores()` - 11 edges
-7. `ProductFormPage()` - 11 edges
+6. `ProductFormPage()` - 11 edges
+7. `useStores()` - 11 edges
 8. `useCartStore` - 11 edges
 9. `Mi Tienda Frontend` - 11 edges
 10. `Mi Tienda Frontend` - 11 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `CategoryCheckboxTree()` --calls--> `cn()`  [INFERRED]
+  src/pages/admin/ProductFormPage.tsx → src/lib/utils.ts
 - `RequireCustomerAuth()` --calls--> `useCustomerAuthStore`  [INFERRED]
   src/app.tsx → src/stores/auth.store.ts
 - `ImageUploader()` --calls--> `cn()`  [INFERRED]
@@ -121,8 +123,6 @@
   src/components/shared/LoadingSpinner.tsx → src/lib/utils.ts
 - `MarkdownRenderer()` --calls--> `cn()`  [INFERRED]
   src/components/shared/MarkdownRenderer.tsx → src/lib/utils.ts
-- `StatusBadge()` --calls--> `cn()`  [INFERRED]
-  src/components/shared/StatusBadge.tsx → src/lib/utils.ts
 
 ## Import Cycles
 - None detected.
@@ -132,7 +132,7 @@
 - **Frontend Tech Stack** — readme_react_vite_spa, readme_tanstack_query, readme_zustand, readme_react_hook_form_zod, readme_shadcn_tailwind [EXTRACTED 1.00]
 - **Dual App Architecture** — readme_admin_app, readme_storefront_app, readme_app_tsx [INFERRED 0.85]
 
-## Communities (102 total, 37 thin omitted)
+## Communities (102 total, 39 thin omitted)
 
 ### Community 0 - "API Types & Interfaces"
 Cohesion: 0.04
@@ -143,16 +143,16 @@ Cohesion: 0.08
 Nodes (25): devDependencies, @babel/core, babel-plugin-react-compiler, eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals (+17 more)
 
 ### Community 2 - "Admin Categories & Products"
-Cohesion: 0.13
-Nodes (16): CategoryCheckboxTree(), ProductForm, ProductFormPage(), VariantForm, ProductsPage(), useAddVariant(), useCreateProduct(), useDeleteProduct() (+8 more)
+Cohesion: 0.14
+Nodes (15): CategoryCheckboxTree(), ProductForm, ProductFormPage(), VariantForm, ProductsPage(), useAddVariant(), useCreateProduct(), useDeleteProduct() (+7 more)
 
 ### Community 3 - "Admin Auth & Dashboard"
-Cohesion: 0.12
-Nodes (15): DashboardPage(), AdminLoginPage(), LoginForm, useCurrentUser(), useLogout(), useSendMagicLink(), useVerifyMagicLink(), DashboardLayout() (+7 more)
+Cohesion: 0.09
+Nodes (19): DashboardPage(), AdminLoginPage(), LoginForm, useCurrentUser(), useLogout(), useSendMagicLink(), useVerifyMagicLink(), DashboardLayout() (+11 more)
 
 ### Community 4 - "UI Utilities & Controls"
 Cohesion: 0.14
-Nodes (20): cn(), SelectContent(), SelectGroup(), SelectItem(), SelectLabel(), SelectScrollDownButton(), SelectScrollUpButton(), SelectSeparator() (+12 more)
+Nodes (23): cn(), Avatar(), AvatarBadge(), AvatarFallback(), AvatarGroup(), AvatarGroupCount(), AvatarImage(), Card() (+15 more)
 
 ### Community 5 - "Package Dependencies"
 Cohesion: 0.05
@@ -207,12 +207,12 @@ Cohesion: 0.18
 Nodes (6): SheetContent(), SheetDescription(), SheetFooter(), SheetHeader(), SheetOverlay(), SheetTitle()
 
 ### Community 21 - "Customer Detail & Utils"
-Cohesion: 0.07
+Cohesion: 0.08
 Nodes (21): CategoriesPage(), CategoryFormValues, CategoryRowProps, categorySchema, dropAnimationConfig, FormFieldsProps, categoriesKey(), useCategories() (+13 more)
 
 ### Community 23 - "Admin Stats & Charts"
-Cohesion: 0.10
-Nodes (19): CustomersPage(), useCreateAddress(), useCustomers(), useDeleteAddress(), useMyAddresses(), useMyOrders(), useMyProfile(), useUpdateAddress() (+11 more)
+Cohesion: 0.12
+Nodes (15): CustomersPage(), useCreateAddress(), useCustomers(), useDeleteAddress(), useMyAddresses(), useMyOrders(), useMyProfile(), useUpdateAddress() (+7 more)
 
 ### Community 25 - "Coupons Admin"
 Cohesion: 0.31
@@ -231,16 +231,12 @@ Cohesion: 0.36
 Nodes (6): apiClient, ApiError, getGuestToken(), getToken(), handleUnauthorized(), request()
 
 ### Community 31 - "UI Card"
-Cohesion: 0.25
-Nodes (7): Card(), CardAction(), CardContent(), CardDescription(), CardFooter(), CardHeader(), CardTitle()
+Cohesion: 0.22
+Nodes (8): Table(), TableBody(), TableCaption(), TableCell(), TableFooter(), TableHead(), TableHeader(), TableRow()
 
 ### Community 33 - "Stats Endpoints"
 Cohesion: 0.48
 Nodes (6): buildQuery(), getOrdersByStatus(), getRevenueOverTime(), getStatsSummary(), getTopProducts(), StatsParams
-
-### Community 34 - "UI Avatar"
-Cohesion: 0.29
-Nodes (6): Avatar(), AvatarBadge(), AvatarFallback(), AvatarGroup(), AvatarGroupCount(), AvatarImage()
 
 ### Community 37 - "UI Alert"
 Cohesion: 0.40
@@ -272,11 +268,11 @@ Nodes (4): hooks, PreToolUse, worktree, bgIsolation
 
 ### Community 64 - "UI Separator"
 Cohesion: 0.20
-Nodes (6): CustomerDetailPage(), useCustomer(), useMyOrder(), formatDate(), truncate(), StorefrontOrderDetailPage()
+Nodes (6): useMyOrder(), formatCurrency(), truncate(), CurrencyDisplay(), CurrencyDisplayProps, StorefrontOrderDetailPage()
 
 ### Community 66 - "UI Switch"
-Cohesion: 0.18
-Nodes (6): StoresPage(), useStores(), CheckoutSuccessPage(), ProductDetailPage(), ProductCard(), ProductsListPage()
+Cohesion: 0.17
+Nodes (8): StoresPage(), useStores(), AddressForm, CheckoutPage(), ContactForm, STEPS, CheckoutSuccessPage(), ProductDetailPage()
 
 ### Community 84 - "Community 84"
 Cohesion: 0.67
@@ -303,42 +299,38 @@ Cohesion: 0.17
 Nodes (11): Auth Flow, Build, Business Rules, Cloudflare Pages Deployment, Environment Variables, Local Development, Mi Tienda Frontend, Prerequisites (+3 more)
 
 ### Community 92 - "Community 92"
-Cohesion: 0.22
-Nodes (7): ALL_STATUSES, OrderDetailPage(), ALL_STATUSES, OrdersPage(), useOrder(), useOrders(), useUpdateOrderStatus()
+Cohesion: 0.16
+Nodes (10): CustomerDetailPage(), ALL_STATUSES, OrderDetailPage(), ALL_STATUSES, OrdersPage(), useCustomer(), useOrder(), useOrders() (+2 more)
 
 ### Community 95 - "Community 95"
-Cohesion: 0.29
-Nodes (5): formatCurrency(), CurrencyDisplay(), CurrencyDisplayProps, ProductCard(), StorefrontHomePage()
+Cohesion: 0.25
+Nodes (5): useProducts(), ProductCard(), ProductsListPage(), ProductCard(), StorefrontHomePage()
 
 ### Community 96 - "Community 96"
 Cohesion: 0.40
 Nodes (3): CartsTab(), useAdminCart(), useAdminCarts()
-
-### Community 97 - "Community 97"
-Cohesion: 0.40
-Nodes (4): AddressForm, CheckoutPage(), ContactForm, STEPS
 
 ### Community 98 - "Community 98"
 Cohesion: 0.50
 Nodes (3): COUNTRY_CODES, SettingsForm, StoreForm
 
 ## Knowledge Gaps
-- **388 isolated node(s):** `PreToolUse`, `allow`, `$schema`, `style`, `rsc` (+383 more)
+- **388 isolated node(s):** `Pagination`, `JSendSuccess`, `JSendFail`, `JSendError`, `JSendResponse` (+383 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **37 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **39 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `UI Utilities & Controls` to `Admin Categories & Products`, `UI Dropdown Menu`, `UI Dialog`, `UI Sheet`, `UI Card`, `UI Avatar`, `UI Alert`, `UI Progress`, `UI Tabs`, `UI Tooltip`, `Image Uploader`, `Status Badge`, `Loading Spinner`, `Markdown Renderer`, `UI Badge`, `UI Button`, `UI Checkbox`, `UI Label`, `UI Separator`, `UI Textarea`, `Community 90`, `Community 100`, `Community 101`?**
+- **Why does `cn()` connect `UI Utilities & Controls` to `Admin Categories & Products`, `UI Dropdown Menu`, `UI Dialog`, `UI Sheet`, `UI Card`, `UI Avatar`, `UI Alert`, `UI Progress`, `UI Tabs`, `UI Tooltip`, `Image Uploader`, `Status Badge`, `Loading Spinner`, `Markdown Renderer`, `UI Badge`, `UI Button`, `UI Checkbox`, `UI Label`, `UI Separator`, `UI Textarea`, `Community 90`, `Community 97`, `Community 100`, `Community 101`?**
   _High betweenness centrality (0.097) - this node is a cross-community bridge._
-- **Why does `formatCurrency()` connect `Community 95` to `UI Separator`, `Community 97`, `UI Switch`, `Community 86`, `Payments Admin`, `Community 92`?**
+- **Why does `formatCurrency()` connect `UI Separator` to `UI Switch`, `Community 86`, `Payments Admin`, `Community 92`, `Community 95`?**
   _High betweenness centrality (0.043) - this node is a cross-community bridge._
-- **Why does `useStores()` connect `UI Switch` to `UI Separator`, `Community 97`, `Admin Auth & Dashboard`, `Admin Store Settings`, `Payments Admin`, `Community 95`?**
+- **Why does `useStores()` connect `UI Switch` to `UI Separator`, `Admin Auth & Dashboard`, `Admin Store Settings`, `Payments Admin`, `Community 95`?**
   _High betweenness centrality (0.036) - this node is a cross-community bridge._
 - **Are the 81 inferred relationships involving `cn()` (e.g. with `CategoryCheckboxTree()` and `ImageUploader()`) actually correct?**
   _`cn()` has 81 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `PreToolUse`, `allow`, `$schema` to the rest of the system?**
+- **What connects `Pagination`, `JSendSuccess`, `JSendFail` to the rest of the system?**
   _389 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `API Types & Interfaces` be split into smaller, more focused modules?**
   _Cohesion score 0.0425531914893617 - nodes in this community are weakly interconnected._
