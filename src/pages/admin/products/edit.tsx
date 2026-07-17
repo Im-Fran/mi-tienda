@@ -30,12 +30,8 @@ import { productSchema, variantSchema } from "@/lib/validators"
 import { ApiError } from "@/api/client"
 import { cn } from "@/lib/utils"
 import type { Resolver } from "react-hook-form"
-import {
-  CategoryCheckboxTree,
-  getAncestorIds,
-  getDescendantIds,
-  findCategory,
-} from "./components/CategoryCheckboxTree"
+import { CategoryCheckboxTree } from "./components/CategoryCheckboxTree"
+import { getAncestorIds, getDescendantIds, findCategory } from "./lib/categoryTree"
 
 type ProductForm = z.output<typeof productSchema>
 type VariantForm = z.output<typeof variantSchema> & { id?: string }
